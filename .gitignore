@@ -1,0 +1,17 @@
+.idea/
+.vscode/
+__pycache__/
+*.pyc
+.DS_Store
+
+data/fonts/*/*
+!data/fonts/msyh.ttc
+
+data/corpus/**
+!data/corpus/The Hitchhiker's Guide to the Galaxy.txt
+
+libs/gpu/GpuWrapper.cpp
+libs/gpu/*.so
+libs/gpu/build/
+
+output/

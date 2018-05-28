@@ -1,0 +1,152 @@
+import random
+import cv2
+import numpy as np
+
+
+class LineState(object):
+    # 三种横线效果的比例和须为 1
+    line_p = [
+        0.2,  # underline
+        0.5,  # table
+        0.3,  # middle highlight
+    ]
+
+    tableline_x_offsets = range(8, 40)
+    tableline_y_offsets = range(3, 10)
+    tableline_thickness = [1, 2]
+
+    # 0/1/2/3: 仅单边（左上右下）
+    # 4/5/6/7: 两边都有线（左上，右上，右下，左下）
+    tableline_options = range(0, 8)
+
+    middleline_thickness = [1, 2, 3]
+    middleline_thickness_p = [0.2, 0.7, 0.1]
+
+
+class Liner(object):
+    def __init__(self):
+        self.linestate = LineState()
+
+    def apply(self, word_img, text_box_pnts, word_color):
+        """
+        :param word_img:  word image with big background
+        :param text_box_pnts: left-top, right-top, right-bottom, left-bottom of text word
+        :return:
+        """
+        line_effect_func = np.random.choice([
+            self.apply_under_line,
+            self.apply_table_line,
+            self.apply_middle_line
+        ], p=self.linestate.line_p)
+
+        return line_effect_func(word_img, text_box_pnts, word_color)
+
+    def apply_under_line(self, word_img, text_box_pnts, word_color):
+        y_offset = random.choice([0, 1])
+
+        text_box_pnts[2][1] += y_offset
+        text_box_pnts[3][1] += y_offset
+
+        line_color = word_color + random.randint(0, 10)
+
+        dst = cv2.line(word_img,
+                       (text_box_pnts[2][0], text_box_pnts[2][1]),
+                       (text_box_pnts[3][0], text_box_pnts[3][1]),
+                       color=line_color,
+                       thickness=1,
+                       lineType=cv2.LINE_AA)
+
+        return dst, text_box_pnts
+
+    def apply_table_line(self, word_img, text_box_pnts, word_color):
+        """
+        共有 8 种可能的画法，横线横穿整张 word_img
+        0/1/2/3: 仅单边（左上右下）
+        4/5/6/7: 两边都有线（左上，右上，右下，左下）
+        """
+        dst = word_img
+        option = random.choice(self.linestate.tableline_options)
+        thickness = random.choice(self.linestate.tableline_thickness)
+        line_color = word_color + random.randint(0, 10)
+
+        top_y_offset = random.choice(self.linestate.tableline_y_offsets)
+        bottom_y_offset = random.choice(self.linestate.tableline_y_offsets)
+        left_x_offset = random.choice(self.linestate.tableline_x_offsets)
+        right_x_offset = random.choice(self.linestate.tableline_x_offsets)
+
+        def is_top():
+            return option in [1, 4, 5]
+
+        def is_bottom():
+            return option in [3, 6, 7]
+
+        def is_left():
+            return option in [0, 4, 7]
+
+        def is_right():
+            return option in [2, 5, 6]
+
+        if is_top():
+            text_box_pnts[0][1] -= top_y_offset
+            text_box_pnts[1][1] -= top_y_offset
+
+        if is_bottom():
+            text_box_pnts[2][1] += bottom_y_offset
+            text_box_pnts[3][1] += bottom_y_offset
+
+        if is_left():
+            text_box_pnts[0][0] -= left_x_offset
+            text_box_pnts[3][0] -= left_x_offset
+
+        if is_right():
+            text_box_pnts[1][0] += right_x_offset
+            text_box_pnts[2][0] += right_x_offset
+
+        if is_bottom():
+            dst = cv2.line(dst,
+                           (0, text_box_pnts[2][1]),
+                           (word_img.shape[1], text_box_pnts[3][1]),
+                           color=line_color,
+                           thickness=thickness,
+                           lineType=cv2.LINE_AA)
+
+        if is_top():
+            dst = cv2.line(dst,
+                           (0, text_box_pnts[0][1]),
+                           (word_img.shape[1], text_box_pnts[1][1]),
+                           color=line_color,
+                           thickness=thickness,
+                           lineType=cv2.LINE_AA)
+
+        if is_left():
+            dst = cv2.line(dst,
+                           (text_box_pnts[0][0], 0),
+                           (text_box_pnts[3][0], word_img.shape[0]),
+                           color=line_color,
+                           thickness=thickness,
+                           lineType=cv2.LINE_AA)
+
+        if is_right():
+            dst = cv2.line(dst,
+                           (text_box_pnts[1][0], 0),
+                           (text_box_pnts[2][0], word_img.shape[0]),
+                           color=line_color,
+                           thickness=thickness,
+                           lineType=cv2.LINE_AA)
+
+        return dst, text_box_pnts
+
+    def apply_middle_line(self, word_img, text_box_pnts, word_color):
+        y_center = int((text_box_pnts[0][1] + text_box_pnts[3][1]) / 2)
+
+        img_mean = int(np.mean(word_img))
+        thickness = np.random.choice(self.linestate.middleline_thickness, p=self.linestate.middleline_thickness_p)
+
+        dst = cv2.line(word_img,
+                       (text_box_pnts[0][0], y_center),
+                       (text_box_pnts[1][0], y_center),
+                       color=img_mean,
+                       thickness=thickness,
+                       lineType=cv2.LINE_AA)
+
+        return dst, text_box_pnts
