@@ -22,10 +22,10 @@ python3 main.py
 
 Some optional arguments:
 - corpus_dir: put txt file in corpus_dir
-- corpus_mode: different corpus type have different load/get_sample method.
-- chars_file: chars not contained in chars_file will be filtered.
+- corpus_mode: different corpus type have different load/get_sample method, see Corresponding function for detail
+- chars_file: chars not contained in chars_file will be filtered
 - bg_dir: 50% image background are loaded from background image dir
-- line: add underline, crop from table line, middle highlight.
+- line: add underline, crop from table line, middle highlight
 - noise: add gauss noise, uniform, salt/pepper noise, poisson noise
 
 There are a lot of configs used in renderer.py, you should change it to meet your own requirements.
@@ -44,3 +44,6 @@ python3 setup.py build_ext --inplace
 # Todo
 - [ ] refactor code, make more configurable
 - [ ] word balance
+- [ ] draw word on background image use Seamless cloning
+- [ ] make char space configurable, currently it's rely on Pillow's implement
+- [ ] generate color text image
