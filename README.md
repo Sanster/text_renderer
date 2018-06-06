@@ -8,6 +8,8 @@ Generate text images for training deep learning ocr model.
 ![example4.jpg](./imgs/example4.jpg)
 
 # Setup
+The code was only tested on Ubuntu 16.04.
+
 Install dependencies:
 ```
 pip3 install -r requirements.txt
