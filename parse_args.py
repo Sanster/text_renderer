@@ -23,7 +23,7 @@ def parse_args():
 
     parser.add_argument('--chars_file', type=str, default='./data/chars/chn.txt')
 
-    parser.add_argument('--fonts_dir', type=str, default='./data/fonts/')
+    parser.add_argument('--fonts_dir', type=str, default='./data/fonts/chn')
     parser.add_argument('--bg_dir', type=str, default='./data/bg')
     parser.add_argument('--corpus_dir', type=str, default='./data/corpus')
     parser.add_argument('--output_dir', type=str, default='./output')

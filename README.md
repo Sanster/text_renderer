@@ -28,6 +28,18 @@ Some optional arguments:
 
 There are a lot of configs used in renderer.py, you should change it to meet your own requirements.
 
+# Tools
+Check how many chars your font not support for a charset:
+```bash
+python3 tools/check_font.py
+
+checking font ./data/fonts/eng/Hack-Regular.ttf
+chars not supported(4971):
+['第', '朱', '广', '沪', '联', '自', '治', '县', '驼', '身', '进', '行', '纳', '税', '防', '火', '墙', '掏', '心', '内', '容', '万', '警','钟', '上', '了', '解'...]
+0 fonts support all chars(5071) in ./data/chars/chn.txt:
+[]
+```
+
 # Generate image using GPU
 If you want to use GPU to speed up image generating, first compile opencv with CUDA.
 [Compiling OpenCV with CUDA support](https://www.pyimagesearch.com/2016/07/11/compiling-opencv-with-cuda-support/)
