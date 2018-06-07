@@ -4,10 +4,15 @@ __pycache__/
 *.pyc
 .DS_Store
 
-data/fonts/*/*
-!data/fonts/msyh.ttc
+data/fonts/
+
+# For example
+!data/fonts/chn/msyh.ttc
+!data/fonts/eng/Hack-Regular.ttf
 
 data/corpus/**
+
+# For example
 !data/corpus/The Hitchhiker's Guide to the Galaxy.txt
 
 libs/gpu/GpuWrapper.cpp
