@@ -4,3 +4,4 @@ pillow
 numpy
 matplotlib
 fontTools
+tenacity
