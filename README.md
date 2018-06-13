@@ -54,9 +54,4 @@ python3 setup.py build_ext --inplace
 
 
 # Todo
-- [ ] refactor code, make more configurable
-- [ ] pre check each font supportted chars 
-- [ ] draw word on background image use Seamless cloning
-- [ ] make char space configurable, currently it's rely on Pillow's implement
-- [ ] word balance
-- [ ] generate color text image
+See https://github.com/Sanster/text_renderer/projects/1
