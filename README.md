@@ -42,6 +42,12 @@ chars not supported(4971):
 []
 ```
 
+# Debug mode
+Run `python3 main.py --debug` will save images with extract information.
+You can see how perspectiveTransform works and all bounding/rotated boxes.
+
+![debug_demo](./imgs/debug_demo.jpg)
+
 # Generate image using GPU
 If you want to use GPU to speed up image generating, first compile opencv with CUDA.
 [Compiling OpenCV with CUDA support](https://www.pyimagesearch.com/2016/07/11/compiling-opencv-with-cuda-support/)

@@ -112,21 +112,24 @@ class Renderer(object):
 
         return x_offset, y_offset
 
-    def crop_img(self, img, corner_pnts):
+    def crop_img(self, img, text_box_pnts_transformed):
         """
         :param img: image to crop
-        :param corner_pnts:
+        :param text_box_pnts_transformed: text_bbox_pnts after apply_perspective_transform
         :return:
             dst: image with desired output size, height=32, width=flags.img_width
             crop_bbox: bounding box on input image
         """
-        bbox = cv2.boundingRect(corner_pnts)
+        bbox = cv2.boundingRect(text_box_pnts_transformed)
         bbox_width = bbox[2]
         bbox_height = bbox[3]
 
-        # 旋转的角度越大，resize 到同一个高度，文字越小
+        # Output shape is (self.out_width, self.out_height)
+        # We randomly put bounding box of transformed text in the output shape
+        # so the max value of dst_height is out_height
+
         # TODO: prevent text too small
-        dst_height = random.randint(25, self.out_height)
+        dst_height = random.randint(self.out_height // 4 * 3, self.out_height)
 
         scale = max(bbox_height / dst_height, bbox_width / self.out_width)
 
@@ -150,16 +153,17 @@ class Renderer(object):
             int_around(self.out_height * scale)
         )
 
-        # It's import do crop first and than do resize
+        # It's important do crop first and than do resize for speed consider
         dst = img[dst_bbox[1]:dst_bbox[1] + dst_bbox[3], dst_bbox[0]:dst_bbox[0] + dst_bbox[2]]
+
         dst = cv2.resize(dst, (self.out_width, self.out_height), interpolation=cv2.INTER_CUBIC)
 
-        crop_bbox = (int_around(dst_bbox[0] * scale),
-                     int_around(dst_bbox[1] * scale),
-                     int_around(dst_bbox[2] * scale),
-                     int_around(dst_bbox[3] * scale))
+        crop_bbox = (int_around(dst_bbox[0]),
+                     int_around(dst_bbox[1]),
+                     int_around(dst_bbox[2]),
+                     int_around(dst_bbox[3]))
 
-        return dst, crop_bbox
+        return dst, dst_bbox
 
     def draw_text_on_bg(self, word, font, bg):
         """
