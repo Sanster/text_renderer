@@ -15,6 +15,7 @@ import cv2
 from libs.timer import Timer
 from parse_args import parse_args
 import libs.utils as utils
+import libs.font_utils as font_utils
 from libs.corpus import RandomCorpus, ChnCorpus, EngCorpus
 from libs.renderer import Renderer, TextEffect
 from tenacity import retry
@@ -31,16 +32,19 @@ corpus_classes = {
 
 flags = parse_args()
 
-fonts = utils.load_fonts(flags.fonts_dir)
+fonts = font_utils.get_font_paths(flags.fonts_dir)
 bgs = utils.load_bgs(flags.bg_dir)
 
 corpus_class = corpus_classes[flags.corpus_mode]
 corpus = corpus_class(chars_file=flags.chars_file, corpus_dir=flags.corpus_dir, length=flags.length)
 
 texteffect = TextEffect(flags)
-renderer = Renderer(corpus, fonts, bgs, texteffect, height=flags.img_height, width=flags.img_width,
+renderer = Renderer(corpus, fonts, bgs, texteffect,
+                    height=flags.img_height,
+                    width=flags.img_width,
                     debug=flags.debug,
-                    gpu=flags.gpu)
+                    gpu=flags.gpu,
+                    strict=flags.strict)
 
 
 def start_listen(q, fname):

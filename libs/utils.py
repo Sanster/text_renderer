@@ -7,6 +7,7 @@ import cv2
 import matplotlib.pyplot as plt
 
 import numpy as np
+import hashlib
 
 
 def viz_img(text_im, fignum=1):
@@ -105,15 +106,11 @@ def load_chars(filepath):
     return ret
 
 
-def load_fonts(fonts_dir):
-    """
-    :param fonts_dir: folder contains ttf、otf or ttc format font
-    :return: path of all fonts
-    """
-    fonts = glob.glob(os.path.join(fonts_dir, "*.*"))
-    print("Total fonts num: %d" % len(fonts))
+def md5(string):
+    m = hashlib.md5()
+    m.update(string.encode('utf-8'))
+    return m.hexdigest()
 
-    if len(fonts) == 0:
-        print("Not found fonts in fonts_dir")
-        exit(-1)
-    return fonts
+
+if __name__ == '__main__':
+    print(md5('test测试'))

@@ -11,6 +11,7 @@ class Corpus(object):
         self.corpus_dir = corpus_dir
         self.length = length
 
+        self.chars_file = chars_file
         self.charsets = load_chars(chars_file)
 
         if not isinstance(self, RandomCorpus):

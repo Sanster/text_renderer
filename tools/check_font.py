@@ -1,33 +1,12 @@
 import argparse
-from itertools import chain
 import glob
 import sys
 import os
+import time
 
-from fontTools.ttLib import TTFont, TTCollection
-from fontTools.unicode import Unicode
-
-sys.path.append('./')
+sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../', '../')))
 from libs.utils import load_chars
-
-
-def check_font_charset(ttf, charset):
-    chars = chain.from_iterable([y + (Unicode[y[0]],) for y in x.cmap.items()] for x in ttf["cmap"].tables)
-
-    chars_int = []
-    for c in chars:
-        chars_int.append(c[0])
-
-    not_support_count = 0
-    not_support_chars = []
-    for c in charset:
-        if ord(c) not in chars_int:
-            not_support_count += 1
-            not_support_chars.append(c)
-
-    ttf.close()
-    return not_support_chars
-
+from libs.font_utils import check_font_chars, load_font
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Find chars not support by some fonts')
@@ -43,31 +22,19 @@ if __name__ == '__main__':
 
     fonts = {}
     for p in font_paths:
-        if p.endswith('ttc'):
-            ttc = TTCollection(p)
-            for f in ttc.fonts:
-                fonts["%s_1" % p] = f
-
-        if p.endswith('ttf') or p.endswith('TTF') or p.endswith('otf'):
-            ttf = TTFont(p, 0, allowVID=0,
-                         ignoreDecompileErrors=True,
-                         fontNumber=-1)
-
-            fonts[p] = ttf
+        ttf = load_font(p)
+        fonts[p] = ttf
 
     useful_fonts = []
     for k, v in fonts.items():
-        print("checking font %s" % k)
-        not_support_chars = check_font_charset(v, charset)
+        unsupported_chars, _ = check_font_chars(v, charset)
 
-        if len(not_support_chars) != 0:
-            print("chars not supported(%d): " % len(not_support_chars))
-            print(not_support_chars)
+        print("font: %s ,chars unsupported: %d" % (k, len(unsupported_chars)))
+        if len(unsupported_chars) != 0:
             if args.delete:
                 os.remove(k)
         else:
             useful_fonts.append(k)
-
 
     print("%d fonts support all chars(%d) in %s:" % (len(useful_fonts), len(charset), args.chars_file))
     print(useful_fonts)

@@ -30,6 +30,17 @@ Some optional arguments:
 
 There are a lot of configs used in renderer.py, you should change it to meet your own requirements.
 
+# Strict mode
+If some chars in corpus is not supported by your font, your will get bad result:
+
+![bad_example1](./imgs/bad_example1.jpg)
+
+![bad_example2](./imgs/bad_example2.jpg)
+
+![bad_example3](./imgs/bad_example3.jpg)
+
+Run `main.py` with `--strict`, renderer will retry get sample from corpus until all chars are supported by a font.
+
 # Tools
 Check how many chars your font not support for a charset:
 ```bash

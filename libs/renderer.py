@@ -3,12 +3,14 @@ import random
 import numpy as np
 import cv2
 from PIL import ImageFont, Image, ImageDraw
+from tenacity import retry
 
 import libs.math_utils as math_utils
 from libs.utils import draw_box, draw_bbox, prob
 from libs.timer import Timer
 from libs.liner import Liner
 from libs.noiser import Noiser
+from libs.font_utils import get_fonts_chars
 
 
 class TextState(object):
@@ -37,7 +39,7 @@ class TextEffect(object):
 
 # noinspection PyMethodMayBeStatic
 class Renderer(object):
-    def __init__(self, corpus, fonts, bgs, texteffect, width=256, height=32, debug=False, gpu=False):
+    def __init__(self, corpus, fonts, bgs, texteffect, width=256, height=32, debug=False, gpu=False, strict=False):
         self.corpus = corpus
         self.fonts = fonts
         self.bgs = bgs
@@ -45,6 +47,7 @@ class Renderer(object):
         self.out_height = height
         self.debug = debug
         self.gpu = gpu
+        self.strict = strict
 
         self.timer = Timer()
         self.textstate = TextState()
@@ -52,10 +55,11 @@ class Renderer(object):
         self.liner = Liner()
         self.noiser = Noiser()
 
-    def gen_img(self):
-        word = self.corpus.get_sample()
+        if self.strict:
+            self.font_chars = get_fonts_chars(self.fonts, corpus.chars_file)
 
-        font, word_size = self.pick_font(word)
+    def gen_img(self):
+        word, font, word_size = self.pick_font()
 
         # Background's height should much larger than raw word image's height,
         # to make sure we can crop full word image after apply perspective
@@ -158,11 +162,6 @@ class Renderer(object):
 
         dst = cv2.resize(dst, (self.out_width, self.out_height), interpolation=cv2.INTER_CUBIC)
 
-        crop_bbox = (int_around(dst_bbox[0]),
-                     int_around(dst_bbox[1]),
-                     int_around(dst_bbox[2]),
-                     int_around(dst_bbox[3]))
-
         return dst, dst_bbox
 
     def draw_text_on_bg(self, word, font, bg):
@@ -245,20 +244,29 @@ class Renderer(object):
 
         return out
 
-    def pick_font(self, word):
+    @retry
+    def pick_font(self):
         """
-        :param word: word to generate
         :return:
             font: truetype
             size: word size, removed offset (width, height)
         """
+        word = self.corpus.get_sample()
         font_path = random.choice(self.fonts)
 
+        if self.strict:
+            supported_chars = self.font_chars[font_path]
+            for c in word:
+                if c not in supported_chars:
+                    print('Retry pick_font(), \'%s\' contains chars \'%s\' not supported by font %s' % (
+                        word, c, font_path))
+                    raise Exception
+
         # Font size in point
-        font_size = random.randint(20, 30)
+        font_size = random.randint(20, 40)
         font = ImageFont.truetype(font_path, font_size)
 
-        return font, self.get_word_size(font, word)
+        return word, font, self.get_word_size(font, word)
 
     def get_word_size(self, font, word):
         """
