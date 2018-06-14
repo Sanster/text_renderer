@@ -93,6 +93,25 @@ class Renderer(object):
         word_img = np.clip(word_img, 0., 255.)
         return word_img, word
 
+    def random_xy_offset(self, src_height, src_width, dst_height, dst_width):
+        y_max_offset = 0
+        if dst_height > src_height:
+            y_max_offset = dst_height - src_height
+
+        x_max_offset = 0
+        if dst_width > src_width:
+            x_max_offset = dst_width - src_width
+
+        y_offset = 0
+        if y_max_offset != 0:
+            y_offset = random.randint(0, y_max_offset)
+
+        x_offset = 0
+        if x_max_offset != 0:
+            x_offset = random.randint(0, x_max_offset)
+
+        return x_offset, y_offset
+
     def crop_img(self, img, corner_pnts):
         """
         :param img: image to crop
@@ -119,21 +138,7 @@ class Renderer(object):
                   np.around(bbox[2] / scale),
                   np.around(bbox[3] / scale))
 
-        y_max_offset = 0
-        if self.out_height > s_bbox_height:
-            y_max_offset = self.out_height - s_bbox_height
-
-        x_max_offset = 0
-        if self.out_width > s_bbox_width:
-            x_max_offset = self.out_width - s_bbox_width
-
-        y_offset = 0
-        if y_max_offset != 0:
-            y_offset = random.randint(0, y_max_offset)
-
-        x_offset = 0
-        if x_max_offset != 0:
-            x_offset = random.randint(0, x_max_offset)
+        x_offset, y_offset = self.random_xy_offset(self.out_height, self.out_width, s_bbox_height, s_bbox_width)
 
         def int_around(val):
             return int(np.around(val))
@@ -155,16 +160,6 @@ class Renderer(object):
                      int_around(dst_bbox[3] * scale))
 
         return dst, crop_bbox
-
-    def keep_radio_scale(self, img, height):
-        h = img.shape[0]
-        w = img.shape[1]
-        scale = h / height
-        s_h = math.ceil(h / scale)
-        s_w = math.ceil(w / scale)
-
-        out = cv2.resize(img, (s_w, s_h), interpolation=cv2.INTER_AREA)
-        return out
 
     def draw_text_on_bg(self, word, font, bg):
         """
@@ -228,11 +223,22 @@ class Renderer(object):
 
         return bg
 
-    # TODO: change background image resize method
     def gen_bg_from_image(self, width, height):
+        """
+        Resize background, let bg_width>=width, bg_height >=height, and random crop from resized background
+        """
+        assert width > height
+
         bg = random.choice(self.bgs)
 
-        out = cv2.resize(bg, (width, height))
+        scale = max(width / bg.shape[1], height / bg.shape[0])
+
+        out = cv2.resize(bg, None, fx=scale, fy=scale)
+
+        x_offset, y_offset = self.random_xy_offset(height, width, out.shape[0], out.shape[1])
+
+        out = out[y_offset:y_offset + height, x_offset:x_offset + width]
+
         return out
 
     def pick_font(self, word):
