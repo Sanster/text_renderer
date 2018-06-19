@@ -8,8 +8,8 @@ from tenacity import retry
 import libs.math_utils as math_utils
 from libs.utils import draw_box, draw_bbox, prob
 from libs.timer import Timer
-from libs.liner import Liner
-from libs.noiser import Noiser
+from textrenderer.liner import Liner
+from textrenderer.noiser import Noiser
 from libs.font_utils import get_fonts_chars
 
 

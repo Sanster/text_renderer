@@ -16,8 +16,8 @@ from libs.timer import Timer
 from parse_args import parse_args
 import libs.utils as utils
 import libs.font_utils as font_utils
-from libs.corpus import RandomCorpus, ChnCorpus, EngCorpus
-from libs.renderer import Renderer, TextEffect
+from textrenderer.corpus import RandomCorpus, ChnCorpus, EngCorpus
+from textrenderer.renderer import Renderer, TextEffect
 from tenacity import retry
 
 lock = mp.Lock()

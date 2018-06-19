@@ -98,9 +98,9 @@ def get_fonts_chars(fonts, chars_file):
             with open(cache_file_path, 'wb') as f:
                 pickle.dump(supported_chars, f, pickle.HIGHEST_PROTOCOL)
         else:
-            print('Load font(%s) supported chars from cache' % font_path)
             with open(cache_file_path, 'rb') as f:
                 supported_chars = pickle.load(f)
+            print('Load font(%s) supported chars(%d) from cache' % (font_path, len(supported_chars)))
 
         out[font_path] = supported_chars
 
