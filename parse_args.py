@@ -13,6 +13,7 @@ def parse_args():
     parser.add_argument('--img_width', type=int, default=256)
 
     parser.add_argument('--chars_file', type=str, default='./data/chars/chn.txt')
+    parser.add_argument('--config_file', type=str, default='./configs/default.yaml')
 
     parser.add_argument('--corpus_mode', type=str, default='chn', choices=['random', 'chn', 'eng'],
                         help='Different corpus type have different load/get_sample method')
@@ -21,9 +22,6 @@ def parse_args():
     parser.add_argument('--corpus_dir', type=str, default='./data/corpus')
     parser.add_argument('--output_dir', type=str, default='./output')
     parser.add_argument('--tag', type=str, default='default', help='output images are saved under output_dir/{tag} dir')
-
-    parser.add_argument('--line', action='store_true', default=False)
-    parser.add_argument('--noise', action='store_true', default=False)
 
     parser.add_argument('--debug', action='store_true', default=False, help="output uncroped image")
     parser.add_argument('--viz', action='store_true', default=False)

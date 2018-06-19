@@ -1,0 +1,49 @@
+perspective_transform:
+  max_x: 25
+  max_y: 25
+  max_z: 5
+
+blur:
+  enable: true
+  fraction: 0.03
+
+prydown:
+  enable: true
+  fraction: 0.03
+
+noise:
+  enable: true
+  fraction: 0.5
+
+  gauss:
+    enable: true
+    fraction: 0.25
+
+  uniform:
+    enable: true
+    fraction: 0.25
+
+  salt_pepper:
+    enable: true
+    fraction: 0.25
+
+  poisson:
+    enable: true
+    fraction: 0.25
+
+line:
+  enable: false
+  fraction: 0.05
+
+  under_line:
+    enable: false
+    fraction: 0.2
+
+  table_line:
+    enable: false
+    fraction: 0.3
+
+  middle_line:
+    enable: false
+    fraction: 0.5
+

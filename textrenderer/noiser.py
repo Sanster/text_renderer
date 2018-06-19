@@ -2,31 +2,38 @@ import numpy as np
 import cv2
 
 
-class NoiseState(object):
-    # 三种横线效果的比例和须为 1
-    p = [
-        0.25,  # gauss noise
-        0.25,  # uniform noise
-        0.25,  # sp noise
-        0.25  # poisson noise
-    ]
-
-
 # https://stackoverflow.com/questions/22937589/how-to-add-noise-gaussian-salt-and-pepper-etc-to-image-in-python-with-opencv
 class Noiser(object):
-    def __init__(self):
-        self.noisestate = NoiseState()
+    def __init__(self, cfg):
+        self.cfg = cfg
 
     def apply(self, img):
         """
         :param img:  word image with big background
         """
-        noise_func = np.random.choice([
-            self.apply_gauss_noise,
-            self.apply_uniform_noise,
-            self.apply_sp_noise,
-            self.apply_poisson_noise
-        ], p=self.noisestate.p)
+
+        p = []
+        funcs = []
+        if self.cfg.noise.gauss.enable:
+            p.append(self.cfg.noise.gauss.fraction)
+            funcs.append(self.apply_gauss_noise)
+
+        if self.cfg.noise.uniform.enable:
+            p.append(self.cfg.noise.uniform.fraction)
+            funcs.append(self.apply_uniform_noise)
+
+        if self.cfg.noise.salt_pepper.enable:
+            p.append(self.cfg.noise.salt_pepper.fraction)
+            funcs.append(self.apply_sp_noise)
+
+        if self.cfg.noise.poisson.enable:
+            p.append(self.cfg.noise.poisson.fraction)
+            funcs.append(self.apply_poisson_noise)
+
+        if len(p) == 0:
+            return img
+
+        noise_func = np.random.choice(funcs, p=p)
 
         return noise_func(img)
 

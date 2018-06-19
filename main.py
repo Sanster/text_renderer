@@ -12,12 +12,13 @@ import os
 
 import cv2
 
+from libs.config import load_config
 from libs.timer import Timer
 from parse_args import parse_args
 import libs.utils as utils
 import libs.font_utils as font_utils
 from textrenderer.corpus import RandomCorpus, ChnCorpus, EngCorpus
-from textrenderer.renderer import Renderer, TextEffect
+from textrenderer.renderer import Renderer
 from tenacity import retry
 
 lock = mp.Lock()
@@ -31,6 +32,7 @@ corpus_classes = {
 }
 
 flags = parse_args()
+cfg = load_config(flags.config_file)
 
 fonts = font_utils.get_font_paths(flags.fonts_dir)
 bgs = utils.load_bgs(flags.bg_dir)
@@ -38,8 +40,7 @@ bgs = utils.load_bgs(flags.bg_dir)
 corpus_class = corpus_classes[flags.corpus_mode]
 corpus = corpus_class(chars_file=flags.chars_file, corpus_dir=flags.corpus_dir, length=flags.length)
 
-texteffect = TextEffect(flags)
-renderer = Renderer(corpus, fonts, bgs, texteffect,
+renderer = Renderer(corpus, fonts, bgs, cfg,
                     height=flags.img_height,
                     width=flags.img_width,
                     debug=flags.debug,

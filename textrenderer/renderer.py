@@ -13,33 +13,9 @@ from textrenderer.noiser import Noiser
 from libs.font_utils import get_fonts_chars
 
 
-class TextState(object):
-    """
-    Used in prob function, 0.03 means 3%
-    """
-    blur = 0.03
-    prydown = 0.03
-
-    # 带有横线效果的图片占总图片的 5%
-    line = 0.1
-
-    noise = 1
-
-
-class TextEffect(object):
-    blur = True
-    prydown = True
-    line = False
-    noise = True
-
-    def __init__(self, flags):
-        self.line = flags.line
-        self.noise = flags.noise
-
-
 # noinspection PyMethodMayBeStatic
 class Renderer(object):
-    def __init__(self, corpus, fonts, bgs, texteffect, width=256, height=32, debug=False, gpu=False, strict=False):
+    def __init__(self, corpus, fonts, bgs, cfg, width=256, height=32, debug=False, gpu=False, strict=False):
         self.corpus = corpus
         self.fonts = fonts
         self.bgs = bgs
@@ -48,12 +24,11 @@ class Renderer(object):
         self.debug = debug
         self.gpu = gpu
         self.strict = strict
+        self.cfg = cfg
 
         self.timer = Timer()
-        self.textstate = TextState()
-        self.texteffect = texteffect
-        self.liner = Liner()
-        self.noiser = Noiser()
+        self.liner = Liner(cfg)
+        self.noiser = Noiser(cfg)
 
         if self.strict:
             self.font_chars = get_fonts_chars(self.fonts, corpus.chars_file)
@@ -67,11 +42,15 @@ class Renderer(object):
 
         word_img, text_box_pnts, word_color = self.draw_text_on_bg(word, font, bg)
 
-        if self.texteffect.line and prob(self.textstate.line):
+        if self.cfg.line.enable and prob(self.cfg.line.fraction):
             word_img, text_box_pnts = self.liner.apply(word_img, text_box_pnts, word_color)
 
         word_img, img_pnts_transformed, text_box_pnts_transformed = \
-            self.apply_perspective_transform(word_img, text_box_pnts, max_x=25, max_y=25, max_z=5, gpu=self.gpu)
+            self.apply_perspective_transform(word_img, text_box_pnts,
+                                             max_x=self.cfg.perspective_transform.max_x,
+                                             max_y=self.cfg.perspective_transform.max_y,
+                                             max_z=self.cfg.perspective_transform.max_z,
+                                             gpu=self.gpu)
 
         if self.debug:
             word_img = draw_box(word_img, img_pnts_transformed, (0, 255, 0))
@@ -81,17 +60,17 @@ class Renderer(object):
         else:
             word_img, crop_bbox = self.crop_img(word_img, text_box_pnts_transformed)
 
-        if self.texteffect.noise and prob(self.textstate.noise):
+        if self.cfg.noise.enable and prob(self.cfg.noise.fraction):
             word_img = np.clip(word_img, 0., 255.)
             word_img = self.noiser.apply(word_img)
 
         blured = False
-        if self.texteffect.blur and prob(self.textstate.blur):
+        if self.cfg.blur.enable and prob(self.cfg.blur.fraction):
             blured = True
             word_img = self.apply_blur_on_output(word_img)
 
         if not blured:
-            if self.texteffect.prydown and prob(self.textstate.prydown):
+            if self.cfg.prydown.enable and prob(self.cfg.prydown.fraction):
                 word_img = self.apply_prydown(word_img)
 
         word_img = np.clip(word_img, 0., 255.)

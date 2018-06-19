@@ -4,13 +4,6 @@ import numpy as np
 
 
 class LineState(object):
-    # 三种横线效果的比例和须为 1
-    line_p = [
-        0.2,  # underline
-        0.5,  # table
-        0.3,  # middle highlight
-    ]
-
     tableline_x_offsets = range(8, 40)
     tableline_y_offsets = range(3, 10)
     tableline_thickness = [1, 2]
@@ -24,8 +17,9 @@ class LineState(object):
 
 
 class Liner(object):
-    def __init__(self):
+    def __init__(self, cfg):
         self.linestate = LineState()
+        self.cfg = cfg
 
     def apply(self, word_img, text_box_pnts, word_color):
         """
@@ -33,11 +27,25 @@ class Liner(object):
         :param text_box_pnts: left-top, right-top, right-bottom, left-bottom of text word
         :return:
         """
-        line_effect_func = np.random.choice([
-            self.apply_under_line,
-            self.apply_table_line,
-            self.apply_middle_line
-        ], p=self.linestate.line_p)
+        line_p = []
+        funcs = []
+
+        if self.cfg.line.under_line.enable:
+            line_p.append(self.cfg.line.under_line.fraction)
+            funcs.append(self.apply_under_line)
+
+        if self.cfg.line.table_line.enable:
+            line_p.append(self.cfg.line.table_line.fraction)
+            funcs.append(self.apply_table_line)
+
+        if self.cfg.line.middle_line.enable:
+            line_p.append(self.cfg.line.middle_line.fraction)
+            funcs.append(self.apply_middle_line)
+
+        if len(line_p) == 0:
+            return word_img, text_box_pnts
+
+        line_effect_func = np.random.choice(funcs, p=line_p)
 
         return line_effect_func(word_img, text_box_pnts, word_color)
 
