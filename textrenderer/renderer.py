@@ -228,6 +228,14 @@ class Renderer(object):
 
         out = out[y_offset:y_offset + height, x_offset:x_offset + width]
 
+        out = self.apply_gauss_blur(out, ks=[7, 11, 13, 15, 17])
+
+        bg_mean = int(np.mean(out))
+
+        alpha = 255 / bg_mean  # 对比度
+        beta = np.random.randint(bg_mean // 2, bg_mean)  # 亮度
+        out = np.uint8(np.clip((alpha * out + beta), 0, 255))
+
         return out
 
     @retry
@@ -326,7 +334,7 @@ class Renderer(object):
         """
         模糊图像，模拟小图片放大的效果
         """
-        scale = random.uniform(1, 2.2)
+        scale = random.uniform(1, 1.5)
         height = img.shape[0]
         width = img.shape[1]
 
