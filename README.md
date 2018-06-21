@@ -21,9 +21,13 @@ Run `python3 main.py`, images and labels.txt will generate at `output/default/`
 Some optional arguments:
 - config_file: control the params used when render images
 - num_img: how many images to generate
+- length: chars or words in a generated image
 - output_dir: where to save the images
 - corpus_dir: put txt file in corpus_dir
-- corpus_mode: different corpus type have different load/get_sample method, see corresponding function for detail
+- corpus_mode: different corpus types have different way to generate samples
+    - random: random pick chars from chars file
+    - chn: pick continuous chars from corpus
+    - eng: pick words from corpus, space is included in label
 - chars_file: chars not contained in chars_file will be filtered
 - bg_dir: 50% image background are loaded from background image dir
 

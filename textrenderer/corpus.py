@@ -10,6 +10,7 @@ class Corpus(object):
     def __init__(self, chars_file, corpus_dir=None, length=None):
         self.corpus_dir = corpus_dir
         self.length = length
+        self.corpus = []
 
         self.chars_file = chars_file
         self.charsets = load_chars(chars_file)
@@ -53,7 +54,6 @@ class RandomCorpus(Corpus):
 class EngCorpus(Corpus):
     def load(self):
         corpus_path = glob.glob(self.corpus_dir + '/*.txt')
-        self.corpus = []
         for i in range(len(corpus_path)):
             print("Load {}th eng corpus".format(i))
             with open(corpus_path[i], encoding='utf-8') as f:
@@ -68,10 +68,8 @@ class EngCorpus(Corpus):
             print("Word count {}".format(len(self.corpus)))
 
     def get_sample(self):
-        word1 = random.choice(self.corpus)
-        word2 = random.choice(self.corpus)
-
-        word = ' '.join([word1, word2])
+        words = [random.choice(self.corpus) for _ in range(self.length)]
+        word = ' '.join(words)
         return word
 
 
@@ -81,7 +79,6 @@ class ChnCorpus(Corpus):
         Load one corpus file as one line
         """
         corpus_path = glob.glob(self.corpus_dir + '/*.txt')
-        self.corpus = []
         for i in range(len(corpus_path)):
             print_end = '\n' if i == len(corpus_path) - 1 else '\r'
             print("Loading chn corpus: {}/{}".format(i + 1, len(corpus_path)), end=print_end)

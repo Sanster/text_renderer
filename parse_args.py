@@ -8,7 +8,10 @@ def parse_args():
 
     parser.add_argument('--num_img', type=int, default=10, help="Number of images to generate")
     parser.add_argument('--length', type=int, default=10,
-                        help='Number of chars in a image, works for chn/random corpus_mode')
+                        help='Chars or words in a image. for eng corpus mode, default length is 3')
+    parser.add_argument('--clip_max_chars', action='store_true', default=False,
+                        help='For training a CRNN model, max number of chars in an image'
+                             'should less then the width of last CNN layer.')
     parser.add_argument('--img_height', type=int, default=32)
     parser.add_argument('--img_width', type=int, default=256)
 

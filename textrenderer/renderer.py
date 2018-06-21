@@ -15,12 +15,15 @@ from libs.font_utils import get_fonts_chars
 
 # noinspection PyMethodMayBeStatic
 class Renderer(object):
-    def __init__(self, corpus, fonts, bgs, cfg, width=256, height=32, debug=False, gpu=False, strict=False):
+    def __init__(self, corpus, fonts, bgs, cfg, width=256, height=32,
+                 clip_max_chars=False, debug=False, gpu=False, strict=False):
         self.corpus = corpus
         self.fonts = fonts
         self.bgs = bgs
         self.out_width = width
         self.out_height = height
+        self.clip_max_chars = clip_max_chars
+        self.max_chars = math.floor(width / 4) - 1
         self.debug = debug
         self.gpu = gpu
         self.strict = strict
@@ -235,6 +238,10 @@ class Renderer(object):
             size: word size, removed offset (width, height)
         """
         word = self.corpus.get_sample()
+
+        if self.clip_max_chars and len(word) > self.max_chars:
+            word = word[:self.max_chars]
+
         font_path = random.choice(self.fonts)
 
         if self.strict:

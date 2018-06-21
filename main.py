@@ -38,11 +38,15 @@ fonts = font_utils.get_font_paths(flags.fonts_dir)
 bgs = utils.load_bgs(flags.bg_dir)
 
 corpus_class = corpus_classes[flags.corpus_mode]
+
+if flags.length == 10 and flags.corpus_mode == 'eng':
+    flags.length = 3
 corpus = corpus_class(chars_file=flags.chars_file, corpus_dir=flags.corpus_dir, length=flags.length)
 
 renderer = Renderer(corpus, fonts, bgs, cfg,
                     height=flags.img_height,
                     width=flags.img_width,
+                    clip_max_chars=flags.clip_max_chars,
                     debug=flags.debug,
                     gpu=flags.gpu,
                     strict=flags.strict)
