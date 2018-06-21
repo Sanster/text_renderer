@@ -1,7 +1,7 @@
 perspective_transform:
   max_x: 25
   max_y: 25
-  max_z: 5
+  max_z: 3
 
 blur:
   enable: true
@@ -13,7 +13,7 @@ prydown:
 
 noise:
   enable: true
-  fraction: 0.5
+  fraction: 0.3
 
   gauss:
     enable: true
