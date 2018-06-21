@@ -22,7 +22,7 @@ def parse_args():
                         help='Different corpus type have different load/get_sample method')
     parser.add_argument('--fonts_dir', type=str, default='./data/fonts/chn')
     parser.add_argument('--bg_dir', type=str, default='./data/bg')
-    parser.add_argument('--corpus_dir', type=str, default='./data/corpus')
+    parser.add_argument('--corpus_dir', type=str, default="./data/corpus")
     parser.add_argument('--output_dir', type=str, default='./output')
     parser.add_argument('--tag', type=str, default='default', help='output images are saved under output_dir/{tag} dir')
 
@@ -45,3 +45,8 @@ def parse_args():
         os.makedirs(flags.save_dir)
 
     return flags
+
+
+if __name__ == '__main__':
+    args = parse_args()
+    print(args.corpus_dir)

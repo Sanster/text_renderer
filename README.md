@@ -23,7 +23,7 @@ Some optional arguments:
 - num_img: how many images to generate
 - length: chars or words in a generated image
 - output_dir: where to save the images
-- corpus_dir: put txt file in corpus_dir
+- corpus_dir: recursively find all txt file in corpus_dir
 - corpus_mode: different corpus types have different way to generate samples
     - random: random pick chars from chars file
     - chn: pick continuous chars from corpus

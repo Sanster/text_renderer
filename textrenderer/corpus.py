@@ -17,6 +17,7 @@ class Corpus(object):
 
         if not isinstance(self, RandomCorpus):
             print("Loading corpus from: " + self.corpus_dir)
+            self.corpus_path = glob.glob(self.corpus_dir + '/**/*.txt')
 
         self.load()
 
@@ -53,10 +54,9 @@ class RandomCorpus(Corpus):
 
 class EngCorpus(Corpus):
     def load(self):
-        corpus_path = glob.glob(self.corpus_dir + '/*.txt')
-        for i in range(len(corpus_path)):
+        for i, p in enumerate(self.corpus_path):
             print("Load {}th eng corpus".format(i))
-            with open(corpus_path[i], encoding='utf-8') as f:
+            with open(p, encoding='utf-8') as f:
                 data = f.read()
 
             for word in data.split(' '):
@@ -78,11 +78,10 @@ class ChnCorpus(Corpus):
         """
         Load one corpus file as one line
         """
-        corpus_path = glob.glob(self.corpus_dir + '/*.txt')
-        for i in range(len(corpus_path)):
-            print_end = '\n' if i == len(corpus_path) - 1 else '\r'
-            print("Loading chn corpus: {}/{}".format(i + 1, len(corpus_path)), end=print_end)
-            with open(corpus_path[i], encoding='utf-8') as f:
+        for i, p in enumerate(self.corpus_path):
+            print_end = '\n' if i == len(self.corpus_path) - 1 else '\r'
+            print("Loading chn corpus: {}/{}".format(i + 1, len(self.corpus_path)), end=print_end)
+            with open(p, encoding='utf-8') as f:
                 data = f.readlines()
 
             lines = []
