@@ -77,6 +77,10 @@ class Renderer(object):
         return word_img, word
 
     def random_xy_offset(self, src_height, src_width, dst_height, dst_width):
+        """
+        Get random left-top point for putting a small rect in a large rect.
+        Normally dst_height>src_height and dst_width>src_width
+        """
         y_max_offset = 0
         if dst_height > src_height:
             y_max_offset = dst_height - src_height
@@ -124,7 +128,7 @@ class Renderer(object):
                   np.around(bbox[2] / scale),
                   np.around(bbox[3] / scale))
 
-        x_offset, y_offset = self.random_xy_offset(self.out_height, self.out_width, s_bbox_height, s_bbox_width)
+        x_offset, y_offset = self.random_xy_offset(s_bbox_height, s_bbox_width, self.out_height, self.out_width)
 
         def int_around(val):
             return int(np.around(val))
