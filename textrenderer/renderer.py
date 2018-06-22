@@ -255,6 +255,8 @@ class Renderer(object):
         if self.strict:
             supported_chars = self.font_chars[font_path]
             for c in word:
+                if c == ' ':
+                    continue
                 if c not in supported_chars:
                     print('Retry pick_font(), \'%s\' contains chars \'%s\' not supported by font %s' % (
                         word, c, font_path))
