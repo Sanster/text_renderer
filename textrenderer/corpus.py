@@ -17,7 +17,10 @@ class Corpus(object):
 
         if not isinstance(self, RandomCorpus):
             print("Loading corpus from: " + self.corpus_dir)
-            self.corpus_path = glob.glob(self.corpus_dir + '/**/*.txt')
+            self.corpus_path = glob.glob(self.corpus_dir + '/**/*.txt', recursive=True)
+            if len(self.corpus_path) == 0:
+                print("Corpus not found.")
+                exit(-1)
 
         self.load()
 

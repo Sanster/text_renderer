@@ -119,12 +119,12 @@ def sort_labels(tmp_label_fname, label_fname):
             f.write(line[9:])
 
 
-def restore_exist_labels(save_dir, label_path):
+def restore_exist_labels(label_path):
     # 如果目标目录存在 labels.txt 则向该目录中追加图片
     start_index = 0
     if os.path.exists(label_path):
-        print('Generate more text images in %s' % flags.save_dir)
         start_index = len(utils.load_chars(label_path))
+        print('Generate more text images in %s. Start index %d' % (flags.save_dir, start_index))
     else:
         print('Generate text images in %s' % flags.save_dir)
     return start_index
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     manager = mp.Manager()
     q = manager.Queue()
 
-    start_index = restore_exist_labels(flags.save_dir, label_path)
+    start_index = restore_exist_labels(label_path)
 
     timer = Timer(Timer.SECOND)
     timer.start()
