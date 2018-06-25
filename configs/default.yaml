@@ -7,9 +7,11 @@ blur:
   enable: true
   fraction: 0.03
 
+# If an image is applied blur, it will not be applied prydown
 prydown:
   enable: true
   fraction: 0.03
+  max_scale: 1.5 # Image will first resize to 1.5x, and than resize to 1x
 
 noise:
   enable: true
