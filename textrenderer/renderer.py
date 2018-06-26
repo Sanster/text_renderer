@@ -6,7 +6,7 @@ from PIL import ImageFont, Image, ImageDraw
 from tenacity import retry
 
 import libs.math_utils as math_utils
-from libs.utils import draw_box, draw_bbox, prob
+from libs.utils import draw_box, draw_bbox, prob, apply
 from libs.timer import Timer
 from textrenderer.liner import Liner
 from textrenderer.noiser import Noiser
@@ -45,7 +45,7 @@ class Renderer(object):
 
         word_img, text_box_pnts, word_color = self.draw_text_on_bg(word, font, bg)
 
-        if self.cfg.line.enable and prob(self.cfg.line.fraction):
+        if apply(self.cfg.line):
             word_img, text_box_pnts = self.liner.apply(word_img, text_box_pnts, word_color)
 
         word_img, img_pnts_transformed, text_box_pnts_transformed = \
@@ -63,17 +63,17 @@ class Renderer(object):
         else:
             word_img, crop_bbox = self.crop_img(word_img, text_box_pnts_transformed)
 
-        if self.cfg.noise.enable and prob(self.cfg.noise.fraction):
+        if apply(self.cfg.noise):
             word_img = np.clip(word_img, 0., 255.)
             word_img = self.noiser.apply(word_img)
 
         blured = False
-        if self.cfg.blur.enable and prob(self.cfg.blur.fraction):
+        if apply(self.cfg.blur):
             blured = True
             word_img = self.apply_blur_on_output(word_img)
 
         if not blured:
-            if self.cfg.prydown.enable and prob(self.cfg.prydown.fraction):
+            if apply(self.cfg.prydown):
                 word_img = self.apply_prydown(word_img)
 
         word_img = np.clip(word_img, 0., 255.)

@@ -112,5 +112,20 @@ def md5(string):
     return m.hexdigest()
 
 
+def apply(cfg_item):
+    """
+    :param cfg_item: a sub cfg item in default.yml, it should contain enable and fraction. such as
+                prydown:
+                    enable: true
+                    fraction: 0.03
+    :return: True/False
+    """
+
+    if cfg_item.enable and prob(cfg_item.fraction):
+        return True
+
+    return False
+
+
 if __name__ == '__main__':
     print(md5('test测试'))
