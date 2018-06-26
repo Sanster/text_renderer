@@ -263,7 +263,7 @@ class Renderer(object):
                     raise Exception
 
         # Font size in point
-        font_size = random.randint(20, 40)
+        font_size = random.randint(self.cfg.font_size.min, self.cfg.font_size.max)
         font = ImageFont.truetype(font_path, font_size)
 
         return word, font, self.get_word_size(font, word)

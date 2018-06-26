@@ -1,3 +1,8 @@
+# Small font_size will make text looks like blured/prydown
+font_size:
+  min: 20
+  max: 40
+
 perspective_transform:
   max_x: 25
   max_y: 25
