@@ -179,7 +179,11 @@ class Renderer(object):
         bg_mean = int(np.mean(bg))
         word_color = random.randint(0, int(bg_mean / 3 * 2))
 
-        draw.text((text_x - offset[0], text_y - offset[1]), word, fill=word_color, font=font)
+        if apply(self.cfg.random_space):
+            text_x, text_y, word_width, word_height = self.draw_text_with_random_space(draw, font, word, word_color,
+                                                                                       bg_width, bg_height)
+        else:
+            draw.text((text_x - offset[0], text_y - offset[1]), word, fill=word_color, font=font)
 
         np_img = np.array(pil_img).astype(np.float32)
 
@@ -191,6 +195,43 @@ class Renderer(object):
         ]
 
         return np_img, text_box_pnts, word_color
+
+    def draw_text_with_random_space(self, draw, font, word, word_color, bg_width, bg_height):
+        """ If random_space applied, text_x, text_y, word_width, word_height may change"""
+        width = 0
+        height = 0
+        chars_size = []
+        y_offset = 10 ** 5
+        for c in word:
+            size = font.getsize(c)
+            chars_size.append(size)
+
+            width += size[0]
+            # set max char height as word height
+            if size[1] > height:
+                height = size[1]
+
+            # Min chars y offset as word y offset
+            # Assume only y offset
+            c_offset = font.getoffset(c)
+            if c_offset[1] < y_offset:
+                y_offset = c_offset[1]
+
+        char_space_width = int(height * np.random.uniform(self.cfg.random_space.min, self.cfg.random_space.max))
+
+        width += (char_space_width * (len(word) - 1))
+
+        text_x = int((bg_width - width) / 2)
+        text_y = int((bg_height - height) / 2)
+
+        c_x = text_x
+        c_y = text_y
+        for i, c in enumerate(word):
+            draw.text((c_x, c_y - y_offset), c, fill=word_color, font=font)
+
+            c_x += (chars_size[i][0] + char_space_width)
+
+        return text_x, text_y, width, height
 
     def gen_bg(self, width, height):
         if prob(0.5):

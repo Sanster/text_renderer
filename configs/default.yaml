@@ -3,6 +3,15 @@ font_size:
   min: 20
   max: 40
 
+# By default, text is drawed by Pillow with (https://stackoverflow.com/questions/43828955/measuring-width-of-text-python-pil)
+# If this is enabled, some text will be drawed char by char with a random space
+random_space:
+  enable: false
+  fraction: 0.3
+  min: -0.1 # -0.1 will make chars very close or even overlapped
+  max: 0.1
+
+
 perspective_transform:
   max_x: 25
   max_y: 25
