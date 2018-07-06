@@ -62,12 +62,14 @@ class EngCorpus(Corpus):
             with open(p, encoding='utf-8') as f:
                 data = f.read()
 
-            for word in data.split(' '):
-                word = word.strip()
-                word = ''.join(filter(lambda x: x in self.charsets, word))
+            lines = data.split('\n')
+            for line in lines:
+                for word in line.split(' '):
+                    word = word.strip()
+                    word = ''.join(filter(lambda x: x in self.charsets, word))
 
-                if word != u'' and len(word) > 2:
-                    self.corpus.append(word)
+                    if word != u'' and len(word) > 2:
+                        self.corpus.append(word)
             print("Word count {}".format(len(self.corpus)))
 
     def get_sample(self):
