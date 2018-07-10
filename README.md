@@ -20,7 +20,8 @@ Run `python3 main.py`, images and labels.txt will generate at `output/default/`.
 
 Run `python3 main.py --help` to see optional arguments.
 
-All text generating effects can be config in a `yaml` file, here are some examples:
+All text generating effects can be config in a `yaml` file, here are some examples,
+all examples' font size is 25(except font size examples).
 
 |Effect name|Image|
 |------------|----|
