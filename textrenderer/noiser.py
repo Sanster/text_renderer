@@ -44,7 +44,7 @@ class Noiser(object):
         row, col = img.shape
 
         mean = 0
-        stddev = np.sqrt(10)
+        stddev = np.sqrt(15)
         gauss_noise = np.zeros((row, col))
         cv2.randn(gauss_noise, mean, stddev)
         out = img + gauss_noise
