@@ -7,30 +7,51 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--num_img', type=int, default=10, help="Number of images to generate")
+
     parser.add_argument('--length', type=int, default=10,
-                        help='Chars or words in a image. for eng corpus mode, default length is 3')
+                        help='Chars(chn) or words(eng) in a image. For eng corpus mode, default length is 3')
+
     parser.add_argument('--clip_max_chars', action='store_true', default=False,
                         help='For training a CRNN model, max number of chars in an image'
                              'should less then the width of last CNN layer.')
+
     parser.add_argument('--img_height', type=int, default=32)
+
     parser.add_argument('--img_width', type=int, default=256)
 
-    parser.add_argument('--chars_file', type=str, default='./data/chars/chn.txt')
-    parser.add_argument('--config_file', type=str, default='./configs/default.yaml')
+    parser.add_argument('--chars_file', type=str, default='./data/chars/chn.txt',
+                        help='Chars not contained in chars_file will be filtered')
+
+    parser.add_argument('--config_file', type=str, default='./configs/default.yaml',
+                        help='Set the parameters when rendering images')
+
+    parser.add_argument('--fonts_dir', type=str, default='./data/fonts/chn')
+
+    parser.add_argument('--bg_dir', type=str, default='./data/bg',
+                        help="50%% image background are loaded from background image dir")
+
+    parser.add_argument('--corpus_dir', type=str, default="./data/corpus",
+                        help='Recursively find all txt file in corpus_dir')
 
     parser.add_argument('--corpus_mode', type=str, default='chn', choices=['random', 'chn', 'eng'],
-                        help='Different corpus type have different load/get_sample method')
-    parser.add_argument('--fonts_dir', type=str, default='./data/fonts/chn')
-    parser.add_argument('--bg_dir', type=str, default='./data/bg')
-    parser.add_argument('--corpus_dir', type=str, default="./data/corpus")
-    parser.add_argument('--output_dir', type=str, default='./output')
+                        help='Different corpus type have different load/get_sample method'
+                             'random: random pick chars from chars file'
+                             'chn: pick continuous chars from corpus'
+                             'eng: pick continuous words from corpus, space is included in label')
+
+    parser.add_argument('--output_dir', type=str, default='./output', help='Images save dir')
+
     parser.add_argument('--tag', type=str, default='default', help='output images are saved under output_dir/{tag} dir')
 
     parser.add_argument('--debug', action='store_true', default=False, help="output uncroped image")
+
     parser.add_argument('--viz', action='store_true', default=False)
+
     parser.add_argument('--strict', action='store_true', default=False,
                         help="check font supported chars when generating images")
+
     parser.add_argument('--gpu', action='store_true', default=False, help="use CUDA to generate image")
+
     parser.add_argument('--num_processes', type=int, default=None,
                         help="Number of processes to generate image. If None, use all cpu cores")
 
