@@ -20,6 +20,22 @@ Run `python3 main.py`, images and labels.txt will generate at `output/default/`.
 
 Run `python3 main.py --help` to see optional arguments.
 
+All text generating effects can be config in a `yaml` file, here are some examples:
+
+|Effect name|Image|
+|------------|----|
+|Origin|![./imgs/effects/origin.jpg]|
+|Perspective Transform|![./imgs/effects/perspective_transform.jpg]|
+|Random char space big|![./imgs/effects/random_space_big.jpg]|
+|Random char space small|![./imgs/effects/random_space_small.jpg]|
+|Reverse color|![./imgs/effects/reverse.jpg]|
+|Blur|![./imgs/effects/blur.jpg]|
+|Font size(15)|![./imgs/effects/font_size_15.jpg]|
+|Font size(40)|![./imgs/effects/font_size_40.jpg]|
+|Middle line|![./imgs/effects/line_middle.jpg]|
+|Table line|![./imgs/effects/line_table.jpg]|
+|Under line|![./imgs/effects/line_under.jpg]|
+
 # Strict mode
 If some chars in corpus is not supported by your font, your will get bad result:
 
