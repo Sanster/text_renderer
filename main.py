@@ -5,6 +5,8 @@ Generate training and test images.
 """
 import traceback
 import numpy as np
+# For fake example
+np.random.seed(42)
 
 import multiprocessing as mp
 from itertools import repeat
@@ -83,7 +85,7 @@ def gen_img_retry(renderer):
 def generate_img(img_index, q):
     global flags, lock, counter
     # Make sure different process has different random seed
-    np.random.seed()
+    # np.random.seed()
 
     im, word = gen_img_retry(renderer)
 

@@ -20,6 +20,12 @@ Run `python3 main.py`, images and labels.txt will generate at `output/default/`.
 
 Run `python3 main.py --help` to see optional arguments.
 
+All text effect can be setted in a `yaml` config file, here are some effects example:
+|Effect|Image|
+|-------|----|
+|Origin||
+
+
 # Strict mode
 If some chars in corpus is not supported by your font, your will get bad result:
 

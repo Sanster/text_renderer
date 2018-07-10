@@ -291,6 +291,7 @@ class Renderer(object):
             size: word size, removed offset (width, height)
         """
         word = self.corpus.get_sample()
+        word = 'Hello world!你好世界'
 
         if self.clip_max_chars and len(word) > self.max_chars:
             word = word[:self.max_chars]
