@@ -24,17 +24,17 @@ All text generating effects can be config in a `yaml` file, here are some exampl
 
 |Effect name|Image|
 |------------|----|
-|Origin|![./imgs/effects/origin.jpg]|
-|Perspective Transform|![./imgs/effects/perspective_transform.jpg]|
-|Random char space big|![./imgs/effects/random_space_big.jpg]|
-|Random char space small|![./imgs/effects/random_space_small.jpg]|
-|Reverse color|![./imgs/effects/reverse.jpg]|
-|Blur|![./imgs/effects/blur.jpg]|
-|Font size(15)|![./imgs/effects/font_size_15.jpg]|
-|Font size(40)|![./imgs/effects/font_size_40.jpg]|
-|Middle line|![./imgs/effects/line_middle.jpg]|
-|Table line|![./imgs/effects/line_table.jpg]|
-|Under line|![./imgs/effects/line_under.jpg]|
+|Origin|![origin](./imgs/effects/origin.jpg)|
+|Perspective Transform|![perspective](./imgs/effects/perspective_transform.jpg)|
+|Random char space big|![random char space big](./imgs/effects/random_space_big.jpg)|
+|Random char space small|![random char space small](./imgs/effects/random_space_small.jpg)|
+|Reverse color|![reverse color](./imgs/effects/reverse.jpg)|
+|Blur|![blur](./imgs/effects/blur.jpg)|
+|Font size(15)|![font size 15](./imgs/effects/font_size_15.jpg)|
+|Font size(40)|![font size 40](./imgs/effects/font_size_40.jpg)|
+|Middle line|![middle line](./imgs/effects/line_middle.jpg)|
+|Table line|![table line](./imgs/effects/line_table.jpg)|
+|Under line|![under line](./imgs/effects/line_under.jpg)|
 
 # Strict mode
 If some chars in corpus is not supported by your font, your will get bad result:
