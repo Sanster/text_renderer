@@ -4,13 +4,18 @@ font_size:
   max: 40
 
 # By default, text is drawed by Pillow with (https://stackoverflow.com/questions/43828955/measuring-width-of-text-python-pil)
-# If this is enabled, some text will be drawed char by char with a random space
+# If `random_space` is enabled, some text will be drawed char by char with a random space
 random_space:
   enable: false
   fraction: 0.3
   min: -0.1 # -0.1 will make chars very close or even overlapped
   max: 0.1
 
+# By default, text is darker than background.
+# If `reverse_color` is enabled, some images will have dark background and light text
+reverse_color:
+  enable: false
+  fraction: 0.5
 
 perspective_transform:
   max_x: 25

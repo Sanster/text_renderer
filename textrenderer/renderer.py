@@ -77,6 +77,10 @@ class Renderer(object):
                 word_img = self.apply_prydown(word_img)
 
         word_img = np.clip(word_img, 0., 255.)
+
+        if apply(self.cfg.reverse_color):
+            word_img = self.reverse_img(word_img)
+
         return word_img, word
 
     def random_xy_offset(self, src_height, src_width, dst_height, dst_width):
@@ -383,3 +387,7 @@ class Renderer(object):
 
         out = cv2.resize(img, (int(width / scale), int(height / scale)), interpolation=cv2.INTER_AREA)
         return cv2.resize(out, (width, height), interpolation=cv2.INTER_AREA)
+
+    def reverse_img(self, word_img):
+        offset = np.random.randint(-10, 10)
+        return 255 + offset - word_img
