@@ -17,6 +17,11 @@ reverse_color:
   enable: false
   fraction: 0.5
 
+# Use image in bg_dir as background for text
+img_bg:
+  enable: true
+  fraction: 0.5
+
 perspective_transform:
   max_x: 25
   max_y: 25

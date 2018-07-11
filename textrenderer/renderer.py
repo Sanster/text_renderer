@@ -238,10 +238,10 @@ class Renderer(object):
         return text_x, text_y, width, height
 
     def gen_bg(self, width, height):
-        if prob(0.5):
-            bg = self.gen_rand_bg(int(width), int(height))
-        else:
+        if apply(self.cfg.img_bg):
             bg = self.gen_bg_from_image(int(width), int(height))
+        else:
+            bg = self.gen_rand_bg(int(width), int(height))
         return bg
 
     def gen_rand_bg(self, width, height):
