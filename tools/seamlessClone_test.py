@@ -2,8 +2,12 @@ from PIL import ImageFont, Image, ImageDraw
 import numpy as np
 import cv2
 
-bg_path = '/home/cwq/code/ocr_end2end/text_gen/bg/000000088218.jpg'
+# bg_path = '/home/cwq/code/ocr_end2end/text_gen/bg/000000088218.jpg'
+bg_path = '/home/cwq/code/text_renderer/data/bg/paper1.png'
 font_path = '/home/cwq/code/ocr_end2end/text_gen/fonts/chn/msyh.ttc'
+
+COLOR = 200
+SEAMLESS_OFFSET = 6
 
 word = '测试图像的无缝融合'
 font = ImageFont.truetype(font_path, 25)
@@ -20,14 +24,14 @@ bg_gray = cv2.cvtColor(bg, cv2.COLOR_BGR2GRAY)
 bg_height = bg.shape[0]
 bg_width = bg.shape[1]
 
-white_bg = np.ones((word_height + 1, word_width)) * 255
+white_bg = np.ones((word_height + SEAMLESS_OFFSET, word_width + SEAMLESS_OFFSET)) * 255
 text_img = Image.fromarray(np.uint8(white_bg))
 draw = ImageDraw.Draw(text_img)
-draw.text((0, 0 - offset[1]), word, fill=150, font=font)
+draw.text((0 + SEAMLESS_OFFSET // 2, 0 - offset[1] + SEAMLESS_OFFSET // 2), word, fill=COLOR, font=font)
 
 bg_gray = Image.fromarray(np.uint8(bg_gray))
 graw_draw = ImageDraw.Draw(bg_gray)
-graw_draw.text((bg_width // 2 - word_width // 2, bg_height // 2 - word_height // 2), word, fill=150, font=font)
+graw_draw.text((bg_width // 2 - word_width // 2, bg_height // 2 - word_height // 2), word, fill=COLOR, font=font)
 bg_gray.save('direct.jpg')
 
 text_img.save('text.jpg')

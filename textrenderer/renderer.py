@@ -154,6 +154,22 @@ class Renderer(object):
 
         return dst, dst_bbox
 
+    def get_word_color(self, bg, text_x, text_y, word_height, word_width):
+        """
+        Only use word roi area to get word color
+        """
+        offset = 10
+        ymin = text_y - offset
+        ymax = text_y + word_height + offset
+        xmin = text_x - offset
+        xmax = text_x + word_width + offset
+
+        word_roi_bg = bg[ymin: ymax, xmin: xmax]
+
+        bg_mean = int(np.mean(word_roi_bg))
+        word_color = random.randint(0, bg_mean)
+        return word_color
+
     def draw_text_on_bg(self, word, font, bg):
         """
         Draw word in the center of background
@@ -180,8 +196,7 @@ class Renderer(object):
         text_x = int((bg_width - word_width) / 2)
         text_y = int((bg_height - word_height) / 2)
 
-        bg_mean = int(np.mean(bg))
-        word_color = random.randint(0, int(bg_mean / 3 * 2))
+        word_color = self.get_word_color(bg, text_x, text_y, word_height, word_width)
 
         if apply(self.cfg.random_space):
             text_x, text_y, word_width, word_height = self.draw_text_with_random_space(draw, font, word, word_color,
