@@ -166,7 +166,7 @@ class Renderer(object):
 
         word_roi_bg = bg[ymin: ymax, xmin: xmax]
 
-        bg_mean = int(np.mean(word_roi_bg))
+        bg_mean = int(np.mean(word_roi_bg) * (2 / 3))
         word_color = random.randint(0, bg_mean)
         return word_color
 
@@ -358,6 +358,8 @@ class Renderer(object):
         x = math_utils.cliped_rand_norm(0, max_x)
         y = math_utils.cliped_rand_norm(0, max_y)
         z = math_utils.cliped_rand_norm(0, max_z)
+
+        # print("x: %f, y: %f, z: %f" % (x, y, z))
 
         transformer = math_utils.PerspectiveTransform(x, y, z, scale=1.0, fovy=50)
 
