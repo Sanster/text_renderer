@@ -1,5 +1,18 @@
 # Text Renderer
-Generate text images for training deep learning ocr model.
+Generate text images for training deep learning OCR model (e.g. [CRNN](https://github.com/bgshih/crnn)).
+Support both latin and non-latin text.
+
+# Setup
+Install dependencies:
+```
+pip3 install -r requirements.txt
+```
+
+The code was only tested on Ubuntu 16.04.
+
+# Demo
+By default, simply run `python3 main.py` will generate 20 text images
+and a labels.txt file in `output/default/`.
 
 ![example1.jpg](./imgs/example1.jpg)
 ![example2.jpg](./imgs/example2.jpg)
@@ -7,25 +20,16 @@ Generate text images for training deep learning ocr model.
 ![example3.jpg](./imgs/example3.jpg)
 ![example4.jpg](./imgs/example4.jpg)
 
-# Setup
-The code was only tested on Ubuntu 16.04.
+# Use your own data to generate image
+1. Please run `python3 main.py --help` to see all optional arguments and their meanings.
+And put your own data in corresponding folder.
 
-Install dependencies:
-```
-pip3 install -r requirements.txt
-```
-
-# Generate image
-Run `python3 main.py`, images and labels.txt will generate at `output/default/`.
-
-Run `python3 main.py --help` to see optional arguments.
-
-All text generating effects can be config in a `yaml` file, here are some examples,
-all examples' font size is 25(except font size examples).
+2. Config text effects and fraction in `configs/default.yaml` file(or create a
+new config file and use it by `--config_file` option), here are some examples:
 
 |Effect name|Image|
 |------------|----|
-|Origin|![origin](./imgs/effects/origin.jpg)|
+|Origin(Font size 25)|![origin](./imgs/effects/origin.jpg)|
 |Perspective Transform|![perspective](./imgs/effects/perspective_transform.jpg)|
 |Random char space big|![random char space big](./imgs/effects/random_space_big.jpg)|
 |Random char space small|![random char space small](./imgs/effects/random_space_small.jpg)|
@@ -37,8 +41,11 @@ all examples' font size is 25(except font size examples).
 |Table line|![table line](./imgs/effects/line_table.jpg)|
 |Under line|![under line](./imgs/effects/line_under.jpg)|
 
+3. Run `main.py` file.
+
 # Strict mode
-If some chars in corpus is not supported by your font, your will get bad result:
+For no-latin language(e.g Chinese), it's very common that some fonts only support
+limited chars. In this case, you will get bad results like these:
 
 ![bad_example1](./imgs/bad_example1.jpg)
 
@@ -46,10 +53,12 @@ If some chars in corpus is not supported by your font, your will get bad result:
 
 ![bad_example3](./imgs/bad_example3.jpg)
 
-Run `main.py` with `--strict`, renderer will retry get sample from corpus until all chars are supported by a font.
+Select fonts that support all chars in `--chars_file` is annoying.
+Run `main.py` with `--strict` option, renderer will retry get text from
+corpus during generate processing until all chars are supported by a font.
 
 # Tools
-Check how many chars your font not support for a charset:
+You can use `check_font.py` script to check how many chars your font not support in `--chars_file`:
 ```bash
 python3 tools/check_font.py
 
@@ -60,21 +69,21 @@ chars not supported(4971):
 []
 ```
 
+# Generate image using GPU
+If you want to use GPU to make generate image faster, first compile opencv with CUDA.
+[Compiling OpenCV with CUDA support](https://www.pyimagesearch.com/2016/07/11/compiling-opencv-with-cuda-support/)
+
+Then build Cython part, and add `--gpu` option when run `main.py`
+```
+cd libs/gpu
+python3 setup.py build_ext --inplace
+```
+
 # Debug mode
 Run `python3 main.py --debug` will save images with extract information.
 You can see how perspectiveTransform works and all bounding/rotated boxes.
 
 ![debug_demo](./imgs/debug_demo.jpg)
-
-# Generate image using GPU
-If you want to use GPU to speed up image generating, first compile opencv with CUDA.
-[Compiling OpenCV with CUDA support](https://www.pyimagesearch.com/2016/07/11/compiling-opencv-with-cuda-support/)
-
-Then build Cython part, and add `--gpu` options when run main.py
-```
-cd libs/gpu
-python3 setup.py build_ext --inplace
-```
 
 
 # Todo
