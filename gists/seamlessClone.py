@@ -48,7 +48,7 @@ cv2.cvtColor(text_img, cv2.COLOR_GRAY2BGR, text_img_bgr)
 print(text_img_bgr.shape)
 print(bg.shape)
 print(text_mask.shape)
-mixed_clone = cv2.seamlessClone(text_img_bgr, bg, text_mask, center, cv2.MIXED_CLONE)
+mixed_clone = cv2.seamlessClone(text_img_bgr, bg, text_mask, center, cv2.MONOCHROME_TRANSFER)
 
 result = cv2.cvtColor(mixed_clone, cv2.COLOR_BGR2GRAY)
 cv2.imwrite('test.jpg', result)

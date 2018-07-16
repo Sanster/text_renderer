@@ -201,10 +201,13 @@ class Renderer(object):
         if apply(self.cfg.random_space):
             text_x, text_y, word_width, word_height = self.draw_text_with_random_space(draw, font, word, word_color,
                                                                                        bg_width, bg_height)
+            np_img = np.array(pil_img).astype(np.float32)
         else:
-            draw.text((text_x - offset[0], text_y - offset[1]), word, fill=word_color, font=font)
-
-        np_img = np.array(pil_img).astype(np.float32)
+            if apply(self.cfg.seamless_clone):
+                np_img = self.draw_text_seamless(font, bg, word, word_color, word_height, word_width, offset)
+            else:
+                draw.text((text_x - offset[0], text_y - offset[1]), word, fill=word_color, font=font)
+                np_img = np.array(pil_img).astype(np.float32)
 
         text_box_pnts = [
             [text_x, text_y],
@@ -214,6 +217,42 @@ class Renderer(object):
         ]
 
         return np_img, text_box_pnts, word_color
+
+    def draw_text_seamless(self, font, bg, word, word_color, word_height, word_width, offset):
+        # For better seamlessClone
+        seamless_offset = 6
+
+        # Draw text on a white image, than draw it on background
+        white_bg = np.ones((word_height + seamless_offset, word_width + seamless_offset)) * 255
+        text_img = Image.fromarray(np.uint8(white_bg))
+        draw = ImageDraw.Draw(text_img)
+        draw.text((0 + seamless_offset // 2, 0 - offset[1] + seamless_offset // 2), word,
+                  fill=word_color, font=font)
+
+        # assume whole text_img as mask
+        text_img = np.array(text_img).astype(np.uint8)
+        text_mask = 255 * np.ones(text_img.shape, text_img.dtype)
+
+        # This is where the CENTER of the airplane will be placed
+        center = (bg.shape[1] // 2, bg.shape[0] // 2)
+
+        # opencv seamlessClone require bgr image
+        text_img_bgr = np.ones((text_img.shape[0], text_img.shape[1], 3), np.uint8)
+        bg_bgr = np.ones((bg.shape[0], bg.shape[1], 3), np.uint8)
+        cv2.cvtColor(text_img, cv2.COLOR_GRAY2BGR, text_img_bgr)
+        cv2.cvtColor(bg, cv2.COLOR_GRAY2BGR, bg_bgr)
+
+        flag = np.random.choice([
+            cv2.NORMAL_CLONE,
+            cv2.MIXED_CLONE,
+            cv2.MONOCHROME_TRANSFER
+        ])
+
+        mixed_clone = cv2.seamlessClone(text_img_bgr, bg_bgr, text_mask, center, flag)
+
+        np_img = cv2.cvtColor(mixed_clone, cv2.COLOR_BGR2GRAY)
+
+        return np_img
 
     def draw_text_with_random_space(self, draw, font, word, word_color, bg_width, bg_height):
         """ If random_space applied, text_x, text_y, word_width, word_height may change"""
