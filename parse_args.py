@@ -6,7 +6,7 @@ import os
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--num_img', type=int, default=10, help="Number of images to generate")
+    parser.add_argument('--num_img', type=int, default=20, help="Number of images to generate")
 
     parser.add_argument('--length', type=int, default=10,
                         help='Chars(chn) or words(eng) in a image. For eng corpus mode, default length is 3')
@@ -20,18 +20,21 @@ def parse_args():
     parser.add_argument('--img_width', type=int, default=256)
 
     parser.add_argument('--chars_file', type=str, default='./data/chars/chn.txt',
-                        help='Chars not contained in chars_file will be filtered')
+                        help='Chars allowed to be appear in generated images.')
 
     parser.add_argument('--config_file', type=str, default='./configs/default.yaml',
                         help='Set the parameters when rendering images')
 
-    parser.add_argument('--fonts_dir', type=str, default='./data/fonts/chn')
+    parser.add_argument('--fonts_dir', type=str, default='./data/fonts/chn',
+                        help='Add fonts you want to use in this folder')
 
     parser.add_argument('--bg_dir', type=str, default='./data/bg',
-                        help="50%% image background are loaded from background image dir")
+                        help="Some text images(according to your config in yaml file) will"
+                             "use pictures in this folder as background")
 
     parser.add_argument('--corpus_dir', type=str, default="./data/corpus",
-                        help='Recursively find all txt file in corpus_dir')
+                        help='When corpus_mode is chn or eng, text on image will randomly selected from corpus.'
+                             'Recursively find all txt file in corpus_dir')
 
     parser.add_argument('--corpus_mode', type=str, default='chn', choices=['random', 'chn', 'eng'],
                         help='Different corpus type have different load/get_sample method'
