@@ -31,6 +31,8 @@ new config file and use it by `--config_file` option), here are some examples:
 |------------|----|
 |Origin(Font size 25)|![origin](./imgs/effects/origin.jpg)|
 |Perspective Transform|![perspective](./imgs/effects/perspective_transform.jpg)|
+|Light border|![light border](./imgs/effects/light_border.jpg)|
+|Dark border|![dark border](./imgs/effects/dark_border.jpg)|
 |Random char space big|![random char space big](./imgs/effects/random_space_big.jpg)|
 |Random char space small|![random char space small](./imgs/effects/random_space_small.jpg)|
 |Reverse color|![reverse color](./imgs/effects/reverse.jpg)|
