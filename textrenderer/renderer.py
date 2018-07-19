@@ -314,8 +314,8 @@ class Renderer(object):
         """
         :param x/y: 应该是移除了 offset 的
         """
-        # thickness larger than 1 will give bad border result
-        thickness = np.random.uniform(0.5, 1)
+        # thickness larger than 1 may give bad border result
+        thickness = 1
 
         choices = []
         p = []
