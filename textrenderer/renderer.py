@@ -206,7 +206,9 @@ class Renderer(object):
             if apply(self.cfg.seamless_clone):
                 np_img = self.draw_text_seamless(font, bg, word, word_color, word_height, word_width, offset)
             else:
-                draw.text((text_x - offset[0], text_y - offset[1]), word, fill=word_color, font=font)
+                self.draw_text_wrapper(draw, word, text_x - offset[0], text_y - offset[1], font, word_color)
+                # draw.text((text_x - offset[0], text_y - offset[1]), word, fill=word_color, font=font)
+
                 np_img = np.array(pil_img).astype(np.float32)
 
         text_box_pnts = [
@@ -226,8 +228,14 @@ class Renderer(object):
         white_bg = np.ones((word_height + seamless_offset, word_width + seamless_offset)) * 255
         text_img = Image.fromarray(np.uint8(white_bg))
         draw = ImageDraw.Draw(text_img)
-        draw.text((0 + seamless_offset // 2, 0 - offset[1] + seamless_offset // 2), word,
-                  fill=word_color, font=font)
+
+        # draw.text((0 + seamless_offset // 2, 0 - offset[1] + seamless_offset // 2), word,
+        #           fill=word_color, font=font)
+
+        self.draw_text_wrapper(draw, word,
+                               0 + seamless_offset // 2,
+                               0 - offset[1] + seamless_offset // 2,
+                               font, word_color)
 
         # assume whole text_img as mask
         text_img = np.array(text_img).astype(np.uint8)
@@ -284,12 +292,61 @@ class Renderer(object):
 
         c_x = text_x
         c_y = text_y
+
         for i, c in enumerate(word):
+            # self.draw_text_wrapper(draw, c, c_x, c_y - y_offset, font, word_color, force_text_border)
             draw.text((c_x, c_y - y_offset), c, fill=word_color, font=font)
 
             c_x += (chars_size[i][0] + char_space_width)
 
         return text_x, text_y, width, height
+
+    def draw_text_wrapper(self, draw, text, x, y, font, text_color):
+        """
+        :param x/y: 应该是移除了 offset 的
+        """
+        if apply(self.cfg.text_border):
+            self.draw_border_text(draw, text, x, y, font, text_color)
+        else:
+            draw.text((x, y), text, fill=text_color, font=font)
+
+    def draw_border_text(self, draw, text, x, y, font, text_color):
+        """
+        :param x/y: 应该是移除了 offset 的
+        """
+        # thickness larger than 1 will give bad border result
+        thickness = np.random.uniform(0.5, 1)
+
+        choices = []
+        p = []
+        if self.cfg.text_border.light.enable:
+            choices.append(0)
+            p.append(self.cfg.text_border.light.fraction)
+        if self.cfg.text_border.dark.enable:
+            choices.append(1)
+            p.append(self.cfg.text_border.dark.fraction)
+
+        light_or_dark = np.random.choice(choices, p=p)
+
+        if light_or_dark == 0:
+            border_color = text_color + np.random.randint(0, 255 - text_color - 1)
+        elif light_or_dark == 1:
+            border_color = text_color - np.random.randint(0, text_color + 1)
+
+        # thin border
+        draw.text((x - thickness, y), text, font=font, fill=border_color)
+        draw.text((x + thickness, y), text, font=font, fill=border_color)
+        draw.text((x, y - thickness), text, font=font, fill=border_color)
+        draw.text((x, y + thickness), text, font=font, fill=border_color)
+
+        # thicker border
+        draw.text((x - thickness, y - thickness), text, font=font, fill=border_color)
+        draw.text((x + thickness, y - thickness), text, font=font, fill=border_color)
+        draw.text((x - thickness, y + thickness), text, font=font, fill=border_color)
+        draw.text((x + thickness, y + thickness), text, font=font, fill=border_color)
+
+        # now draw the text over it
+        draw.text((x, y), text, font=font, fill=text_color)
 
     def gen_bg(self, width, height):
         if apply(self.cfg.img_bg):

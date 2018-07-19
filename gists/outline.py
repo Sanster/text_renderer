@@ -20,23 +20,25 @@ font = '../data/fonts/chn/msyh.ttc'
 draw = ImageDraw.Draw(im)
 font = ImageFont.truetype(font, pointsize)
 
-# thin border
-draw.text((x-thickness, y), text, font=font, fill=shadowcolor)
-draw.text((x+thickness, y), text, font=font, fill=shadowcolor)
-draw.text((x, y-thickness), text, font=font, fill=shadowcolor)
-draw.text((x, y+thickness), text, font=font, fill=shadowcolor)
 
-# thicker border
-draw.text((x-thickness, y-thickness), text, font=font, fill=shadowcolor)
-draw.text((x+thickness, y-thickness), text, font=font, fill=shadowcolor)
-draw.text((x-thickness, y+thickness), text, font=font, fill=shadowcolor)
-draw.text((x+thickness, y+thickness), text, font=font, fill=shadowcolor)
+def draw_border_text(draw, text, x, y, font, thickness, border_color, text_color):
+    # thin border
+    draw.text((x - thickness, y), text, font=font, fill=border_color)
+    draw.text((x + thickness, y), text, font=font, fill=border_color)
+    draw.text((x, y - thickness), text, font=font, fill=border_color)
+    draw.text((x, y + thickness), text, font=font, fill=border_color)
 
-# now draw the text over it
-draw.text((x, y), text, font=font, fill=fillcolor)
+    # thicker border
+    draw.text((x - thickness, y - thickness), text, font=font, fill=border_color)
+    draw.text((x + thickness, y - thickness), text, font=font, fill=border_color)
+    draw.text((x - thickness, y + thickness), text, font=font, fill=border_color)
+    draw.text((x + thickness, y + thickness), text, font=font, fill=border_color)
+
+    # now draw the text over it
+    draw.text((x, y), text, font=font, fill=text_color)
+
 
 fname2 = "test2.png"
 im.save(fname2)
 
 im.convert('LA').save('gray.png')
-

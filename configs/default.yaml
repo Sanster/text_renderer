@@ -22,6 +22,21 @@ img_bg:
   enable: true
   fraction: 0.5
 
+# Not work when random_space applied
+text_border:
+  enable: false
+  fraction: 0.5
+
+  # lighter than word color
+  light:
+    enable: true
+    fraction: 0.5
+
+  # darker than word color
+  dark:
+    enable: true
+    fraction: 0.5
+
 # https://docs.opencv.org/3.4/df/da0/group__photo__clone.html#ga2bf426e4c93a6b1f21705513dfeca49d
 # https://www.cs.virginia.edu/~connelly/class/2014/comp_photo/proj2/poisson.pdf
 # Use opencv seamlessClone() to draw text on background
