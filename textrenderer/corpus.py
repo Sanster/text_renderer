@@ -119,3 +119,18 @@ class ChnCorpus(Corpus):
 
         word = line[start:start + self.length]
         return word
+
+
+def get_corpus(corpus_mode: str, chars_file: str, corpus_dir: str, length: int):
+    corpus_classes = {
+        "random": RandomCorpus,
+        "chn": ChnCorpus,
+        "eng": EngCorpus
+    }
+
+    corpus_class = corpus_classes[corpus_mode]
+
+    if length == 10 and corpus_mode == 'eng':
+        length = 3
+
+    return corpus_class(chars_file=chars_file, corpus_dir=corpus_dir, length=length)
