@@ -15,7 +15,8 @@ def get_font_paths(fonts_dir):
     :return: path of all fonts
     """
     print('Load fonts from %s' % os.path.abspath(fonts_dir))
-    fonts = glob.glob(os.path.join(fonts_dir, "*.*"))
+    fonts = glob.glob(fonts_dir + '/**/*', recursive=True)
+    fonts = list(filter(lambda x: os.path.isfile(x), fonts))
     print("Total fonts num: %d" % len(fonts))
 
     if len(fonts) == 0:
