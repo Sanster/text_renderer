@@ -388,9 +388,10 @@ class Renderer(object):
 
         bg_mean = int(np.mean(out))
 
-        alpha = 255 / bg_mean  # 对比度
-        beta = np.random.randint(bg_mean // 2, bg_mean)  # 亮度
-        out = np.uint8(np.clip((alpha * out + beta), 0, 255))
+        # TODO: find a better way to deal with background
+        # alpha = 255 / bg_mean  # 对比度
+        # beta = np.random.randint(bg_mean // 4, bg_mean // 2)  # 亮度
+        # out = np.uint8(np.clip((alpha * out + beta), 0, 255))
 
         return out
 
