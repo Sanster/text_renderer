@@ -7,7 +7,7 @@ from PIL import Image, ImageFont, ImageDraw
 
 x, y = 10, 10
 
-fname1 = "../data/bg/paper0.png"
+fname1 = "../data/bg/背景.png"
 im = Image.open(fname1)
 pointsize = 25
 thickness = 2
