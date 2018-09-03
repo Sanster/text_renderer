@@ -11,6 +11,14 @@ random_space:
   min: -0.1 # -0.1 will make chars very close or even overlapped
   max: 0.1
 
+# Do remap with sin()
+# curve:
+#   enable: false
+#   fraction: 1.0
+#   Period: 360  # degree
+#   max: 10
+
+
 # By default, text is darker than background.
 # If `reverse_color` is enabled, some images will have dark background and light text
 reverse_color:
