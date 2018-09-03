@@ -12,8 +12,10 @@ from textrenderer.liner import Liner
 from textrenderer.noiser import Noiser
 from libs.font_utils import get_fonts_chars
 
-
 # noinspection PyMethodMayBeStatic
+from textrenderer.remaper import Remaper
+
+
 class Renderer(object):
     def __init__(self, corpus, fonts, bgs, cfg, width=256, height=32,
                  clip_max_chars=False, debug=False, gpu=False, strict=False):
@@ -32,6 +34,7 @@ class Renderer(object):
         self.timer = Timer()
         self.liner = Liner(cfg)
         self.noiser = Noiser(cfg)
+        self.remaper = Remaper(cfg)
 
         if self.strict:
             self.font_chars = get_fonts_chars(self.fonts, corpus.chars_file)
@@ -47,6 +50,9 @@ class Renderer(object):
 
         if apply(self.cfg.line):
             word_img, text_box_pnts = self.liner.apply(word_img, text_box_pnts, word_color)
+
+        if apply(self.cfg.curve):
+            word_img, text_box_pnts = self.remaper.apply(word_img, text_box_pnts, word_color)
 
         word_img, img_pnts_transformed, text_box_pnts_transformed = \
             self.apply_perspective_transform(word_img, text_box_pnts,
