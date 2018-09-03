@@ -20,9 +20,9 @@ def draw_four_vectors(img, line, color=(0, 255, 0)):
     return img
 
 
-h = 300
+h = 1000
 w = 1000
-text = "Hello world！你好世界"
+text = "关于那次灾难的奇特"
 font_path = './data/fonts/chn/msyh.ttc'
 font_size = 30
 
@@ -58,7 +58,7 @@ img_x = np.zeros((h, w), np.float32)
 img_y = np.zeros((h, w), np.float32)
 
 period = 360  # degree
-max_val = 10
+max_val = 18
 
 
 def remap_y(x):
@@ -74,7 +74,7 @@ for y in range(h):
         img_x[y, x] = x
 
 # remap text box pnts
-dst = cv2.remap(img, img_x, img_y, cv2.INTER_LINEAR)
+dst = cv2.remap(img, img_x, img_y, cv2.INTER_CUBIC)
 
 # 对 text_x 和 text_x + word_width 之间的所有值进行 remap
 # 找到 remap 以后的 ymin 和 ymax
@@ -84,8 +84,8 @@ remap_y_offset_max_x = max(list(range(text_x, text_x + word_width)), key=lambda 
 remap_y_offset_min = remap_y(remap_y_offset_min_x)
 remap_y_offset_max = remap_y(remap_y_offset_max_x)
 
-print(remap_y_offset_min)
-print(remap_y_offset_max)
+print("remap_y_offser_min_x={}, remap_y_offset_min={}".format(remap_y_offset_min_x, remap_y_offset_min))
+print("remap_y_offser_max_x={}, remap_y_offset_max={}".format(remap_y_offset_max_x, remap_y_offset_max))
 
 remaped_text_box_pnts = [
     [text_x, text_y + remap_y_offset_min],

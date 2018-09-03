@@ -51,8 +51,14 @@ class Renderer(object):
         if apply(self.cfg.line):
             word_img, text_box_pnts = self.liner.apply(word_img, text_box_pnts, word_color)
 
+        if self.debug:
+            word_img = draw_box(word_img, text_box_pnts, (0, 255, 155))
+
         if apply(self.cfg.curve):
             word_img, text_box_pnts = self.remaper.apply(word_img, text_box_pnts, word_color)
+
+        if self.debug:
+            word_img = draw_box(word_img, text_box_pnts, (155, 255, 0))
 
         word_img, img_pnts_transformed, text_box_pnts_transformed = \
             self.apply_perspective_transform(word_img, text_box_pnts,
@@ -62,10 +68,10 @@ class Renderer(object):
                                              gpu=self.gpu)
 
         if self.debug:
-            word_img = draw_box(word_img, img_pnts_transformed, (0, 255, 0))
-            word_img = draw_box(word_img, text_box_pnts_transformed, (0, 0, 255))
+            # word_img = draw_box(word_img, img_pnts_transformed, (0, 255, 0))
+            # word_img = draw_box(word_img, text_box_pnts_transformed, (0, 0, 255))
             _, crop_bbox = self.crop_img(word_img, text_box_pnts_transformed)
-            word_img = draw_bbox(word_img, crop_bbox, (255, 0, 0))
+            # word_img = draw_bbox(word_img, crop_bbox, (255, 0, 0))
         else:
             word_img, crop_bbox = self.crop_img(word_img, text_box_pnts_transformed)
 

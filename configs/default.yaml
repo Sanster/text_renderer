@@ -12,11 +12,13 @@ random_space:
   max: 0.1
 
 # Do remap with sin()
+# Currently this process is very slow!
 curve:
   enable: false
   fraction: 0.3
   period: 360  # degree, sin 函数的周期
-  max: 5 # sin 函数的幅值
+  min: 1 # sin 函数的幅值范围
+  max: 5
 
 
 # By default, text is darker than background.
