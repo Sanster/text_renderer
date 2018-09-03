@@ -37,8 +37,6 @@ new config file and use it by `--config_file` option), here are some examples:
 |Random char space small|![random char space small](./imgs/effects/random_space_small.jpg)|
 |Reverse color|![reverse color](./imgs/effects/reverse.jpg)|
 |Blur|![blur](./imgs/effects/blur.jpg)|
-|Font size(15)|![font size 15](./imgs/effects/font_size_15.jpg)|
-|Font size(40)|![font size 40](./imgs/effects/font_size_40.jpg)|
 |Middle line|![middle line](./imgs/effects/line_middle.jpg)|
 |Table line|![table line](./imgs/effects/line_table.jpg)|
 |Under line|![under line](./imgs/effects/line_under.jpg)|
