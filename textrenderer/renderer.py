@@ -36,6 +36,8 @@ class Renderer(object):
         self.noiser = Noiser(cfg)
         self.remaper = Remaper(cfg)
 
+        self.create_kernals()
+
         if self.strict:
             self.font_chars = get_fonts_chars(self.fonts, corpus.chars_file)
 
@@ -92,6 +94,9 @@ class Renderer(object):
 
         if apply(self.cfg.reverse_color):
             word_img = self.reverse_img(word_img)
+
+        if apply(self.cfg.emboss):
+            word_img = self.apply_emboss(word_img)
 
         return word_img, word
 
@@ -517,3 +522,13 @@ class Renderer(object):
     def reverse_img(self, word_img):
         offset = np.random.randint(-10, 10)
         return 255 + offset - word_img
+
+    def create_kernals(self):
+        self.emboss_kernal = np.array([
+            [-2, -1, 0],
+            [-1, 1, 1],
+            [0, 1, 2]
+        ])
+
+    def apply_emboss(self, word_img):
+        return cv2.filter2D(word_img, -1, self.emboss_kernal)
