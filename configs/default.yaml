@@ -21,13 +21,6 @@ curve:
   max: 5
 
 
-# This operate is operate on the final output image.
-# By default, text is darker than background.
-# If `reverse_color` is enabled, some images will have dark background and light text
-reverse_color:
-  enable: false
-  fraction: 0.5
-
 # Use image in bg_dir as background for text
 img_bg:
   enable: true
@@ -107,8 +100,20 @@ line:
     enable: false
     fraction: 0.5
 
-# This operate is operate on the final output image,
+# These operates are applied on the final output image,
 # so actually it can also be applied in training process as an data augmentation method.
+
+# By default, text is darker than background.
+# If `reverse_color` is enabled, some images will have dark background and light text
+reverse_color:
+  enable: false
+  fraction: 0.5
+
 emboss:
   enable: false
   fraction: 0.1
+
+share:
+  enable: false
+  fraction: 0.1
+
