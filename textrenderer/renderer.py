@@ -98,6 +98,9 @@ class Renderer(object):
         if apply(self.cfg.emboss):
             word_img = self.apply_emboss(word_img)
 
+        if apply(self.cfg.sharp):
+            word_img = self.apply_sharp(word_img)
+
         return word_img, word
 
     def random_xy_offset(self, src_height, src_width, dst_height, dst_width):
@@ -531,5 +534,14 @@ class Renderer(object):
             [0, 1, 2]
         ])
 
+        self.sharp_kernel = np.array([
+            [-1, -1, -1],
+            [-1, 9, -1],
+            [-1, -1, -1]
+        ])
+
     def apply_emboss(self, word_img):
         return cv2.filter2D(word_img, -1, self.emboss_kernal)
+
+    def apply_sharp(self, word_img):
+        return cv2.filter2D(word_img, -1, self.sharp_kernel)
