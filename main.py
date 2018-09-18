@@ -65,12 +65,12 @@ def start_listen(q, fname):
 def gen_img_retry(renderer):
     try:
         return renderer.gen_img()
-    except Exception:
-        print("Retry gen_img")
+    except Exception as e:
+        print("Retry gen_img: %s" % str(e))
         raise Exception
 
 
-def generate_img(img_index, q):
+def generate_img(img_index, q=None):
     global flags, lock, counter
     # Make sure different process has different random seed
     np.random.seed()
@@ -84,7 +84,9 @@ def generate_img(img_index, q):
         cv2.imwrite(fname, im)
 
         label = "{} {}".format(base_name, word)
-        q.put(label)
+
+        if q is not None:
+            q.put(label)
 
         with lock:
             counter.value += 1
