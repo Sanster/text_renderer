@@ -113,7 +113,7 @@ emboss:
   enable: false
   fraction: 0.1
 
-share:
+sharp:
   enable: false
   fraction: 0.1
 
