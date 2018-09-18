@@ -3,12 +3,13 @@ Generate text images for training deep learning OCR model (e.g. [CRNN](https://g
 Support both latin and non-latin text.
 
 # Setup
+- Ubuntu 16.04
+- python 3.5+
+
 Install dependencies:
 ```
 pip3 install -r requirements.txt
 ```
-
-The code was only tested on Ubuntu 16.04.
 
 # Demo
 By default, simply run `python3 main.py` will generate 20 text images
