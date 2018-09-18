@@ -123,6 +123,13 @@ def restore_exist_labels(label_path):
     return start_index
 
 
+def get_num_processes(flags):
+    processes = flags.num_processes
+    if processes is None:
+        processes = max(os.cpu_count(), 2)
+    return processes
+
+
 if __name__ == "__main__":
     # It seems there are some problems when using opencv in multiprocessing fork way
     # https://github.com/opencv/opencv/issues/5150#issuecomment-161371095
@@ -143,7 +150,7 @@ if __name__ == "__main__":
 
     timer = Timer(Timer.SECOND)
     timer.start()
-    with mp.Pool(processes=flags.num_processes) as pool:
+    with mp.Pool(processes=get_num_processes(flags)) as pool:
         if not flags.viz:
             pool.apply_async(start_listen, (q, tmp_label_path))
 
