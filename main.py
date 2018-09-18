@@ -3,6 +3,7 @@
 """
 Generate training and test images.
 """
+import multiprocessing
 import traceback
 import numpy as np
 
@@ -123,6 +124,12 @@ def restore_exist_labels(label_path):
 
 
 if __name__ == "__main__":
+    # It seems there are some problems when using opencv in multiprocessing fork way
+    # https://github.com/opencv/opencv/issues/5150#issuecomment-161371095
+    # https://github.com/pytorch/pytorch/issues/3492#issuecomment-382660636
+    if utils.get_platform() == "OS X":
+        mp.set_start_method('spawn', force=True)
+
     if flags.viz == 1:
         flags.num_processes = 1
 

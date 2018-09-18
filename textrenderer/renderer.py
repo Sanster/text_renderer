@@ -43,21 +43,25 @@ class Renderer(object):
 
     def gen_img(self):
         word, font, word_size = self.pick_font()
+        self.dmsg("after pick font")
 
         # Background's height should much larger than raw word image's height,
         # to make sure we can crop full word image after apply perspective
         bg = self.gen_bg(width=word_size[0] * 8, height=word_size[1] * 8)
-
         word_img, text_box_pnts, word_color = self.draw_text_on_bg(word, font, bg)
+
+        self.dmsg("After draw_text_on_bg")
 
         if apply(self.cfg.line):
             word_img, text_box_pnts = self.liner.apply(word_img, text_box_pnts, word_color)
+            self.dmsg("After draw line")
 
         if self.debug:
             word_img = draw_box(word_img, text_box_pnts, (0, 255, 155))
 
         if apply(self.cfg.curve):
             word_img, text_box_pnts = self.remaper.apply(word_img, text_box_pnts, word_color)
+            self.dmsg("After remapping")
 
         if self.debug:
             word_img = draw_box(word_img, text_box_pnts, (155, 255, 0))
@@ -69,6 +73,8 @@ class Renderer(object):
                                              max_z=self.cfg.perspective_transform.max_z,
                                              gpu=self.gpu)
 
+        self.dmsg("After perspective transform")
+
         if self.debug:
             # word_img = draw_box(word_img, img_pnts_transformed, (0, 255, 0))
             # word_img = draw_box(word_img, text_box_pnts_transformed, (0, 0, 255))
@@ -77,31 +83,43 @@ class Renderer(object):
         else:
             word_img, crop_bbox = self.crop_img(word_img, text_box_pnts_transformed)
 
+        self.dmsg("After crop_img")
+
         if apply(self.cfg.noise):
             word_img = np.clip(word_img, 0., 255.)
             word_img = self.noiser.apply(word_img)
+            self.dmsg("After noiser")
 
         blured = False
         if apply(self.cfg.blur):
             blured = True
             word_img = self.apply_blur_on_output(word_img)
+            self.dmsg("After blur")
 
         if not blured:
             if apply(self.cfg.prydown):
                 word_img = self.apply_prydown(word_img)
+                self.dmsg("After prydown")
 
         word_img = np.clip(word_img, 0., 255.)
 
         if apply(self.cfg.reverse_color):
             word_img = self.reverse_img(word_img)
+            self.dmsg("After reverse_img")
 
         if apply(self.cfg.emboss):
             word_img = self.apply_emboss(word_img)
+            self.dmsg("After emboss")
 
         if apply(self.cfg.sharp):
             word_img = self.apply_sharp(word_img)
+            self.dmsg("After sharp")
 
         return word_img, word
+
+    def dmsg(self, msg):
+        if self.debug:
+            print(msg)
 
     def random_xy_offset(self, src_height, src_width, dst_height, dst_width):
         """
