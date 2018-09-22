@@ -29,7 +29,7 @@ STOP_TOKEN = 'kill'
 flags = parse_args()
 cfg = load_config(flags.config_file)
 
-fonts = font_utils.get_font_paths(flags.fonts_dir)
+fonts = font_utils.get_font_paths_from_list(flags.fonts_list)
 bgs = utils.load_bgs(flags.bg_dir)
 
 corpus = get_corpus(flags.corpus_mode, flags.chars_file, flags.corpus_dir, flags.length)

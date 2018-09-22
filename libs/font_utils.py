@@ -11,6 +11,7 @@ from .utils import md5, load_chars
 
 def get_font_paths(fonts_dir):
     """
+    Load font path recursively from a folder
     :param fonts_dir: folder contains ttf、otf or ttc format font
     :return: path of all fonts
     """
@@ -22,6 +23,20 @@ def get_font_paths(fonts_dir):
     if len(fonts) == 0:
         print("Not found fonts in fonts_dir")
         exit(-1)
+    return fonts
+
+
+def get_font_paths_from_list(list_filename):
+    with open(list_filename) as f:
+        lines = f.readlines()
+        fonts = [os.path.abspath(l.strip()) for l in lines]
+
+        for font in fonts:
+            if not os.path.exists(font):
+                print("Font [%s] not exist." % font)
+                exit(-1)
+
+        print("Total fonts num: %d" % len(lines))
     return fonts
 
 
