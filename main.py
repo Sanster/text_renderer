@@ -3,7 +3,6 @@
 """
 Generate training and test images.
 """
-import multiprocessing
 import traceback
 import numpy as np
 
@@ -18,7 +17,7 @@ from libs.timer import Timer
 from parse_args import parse_args
 import libs.utils as utils
 import libs.font_utils as font_utils
-from textrenderer.corpus import RandomCorpus, ChnCorpus, EngCorpus, get_corpus
+from textrenderer.corpus.corpus_utils import corpus_factory
 from textrenderer.renderer import Renderer
 from tenacity import retry
 
@@ -32,7 +31,7 @@ cfg = load_config(flags.config_file)
 fonts = font_utils.get_font_paths_from_list(flags.fonts_list)
 bgs = utils.load_bgs(flags.bg_dir)
 
-corpus = get_corpus(flags.corpus_mode, flags.chars_file, flags.corpus_dir, flags.length)
+corpus = corpus_factory(flags.corpus_mode, flags.chars_file, flags.corpus_dir, flags.length)
 
 renderer = Renderer(corpus, fonts, bgs, cfg,
                     height=flags.img_height,

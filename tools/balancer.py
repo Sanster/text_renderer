@@ -7,7 +7,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.abspath(os.path.join(__file__, '../', '../')))
 from libs.utils import prob
-from textrenderer.corpus import ChnCorpus
+from textrenderer.corpus.chn_corpus import ChnCorpus
 
 
 class BalanceCorpus(ChnCorpus):
