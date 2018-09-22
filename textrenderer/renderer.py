@@ -76,10 +76,8 @@ class Renderer(object):
         self.dmsg("After perspective transform")
 
         if self.debug:
-            # word_img = draw_box(word_img, img_pnts_transformed, (0, 255, 0))
-            # word_img = draw_box(word_img, text_box_pnts_transformed, (0, 0, 255))
             _, crop_bbox = self.crop_img(word_img, text_box_pnts_transformed)
-            # word_img = draw_bbox(word_img, crop_bbox, (255, 0, 0))
+            word_img = draw_bbox(word_img, crop_bbox, (255, 0, 0))
         else:
             word_img, crop_bbox = self.crop_img(word_img, text_box_pnts_transformed)
 
@@ -146,6 +144,7 @@ class Renderer(object):
 
     def crop_img(self, img, text_box_pnts_transformed):
         """
+        Crop text from large input image
         :param img: image to crop
         :param text_box_pnts_transformed: text_bbox_pnts after apply_perspective_transform
         :return:
@@ -161,36 +160,45 @@ class Renderer(object):
         # so the max value of dst_height is out_height
 
         # TODO: prevent text too small
+        # dst_height and dst_width is used to leave some padding around text bbox
         dst_height = random.randint(self.out_height // 4 * 3, self.out_height)
 
-        scale = max(bbox_height / dst_height, bbox_width / self.out_width)
+        if self.out_width == 0:
+            scale = bbox_height / dst_height
+        else:
+            dst_width = self.out_width
+            scale = max(bbox_height / dst_height, bbox_width / self.out_width)
 
         s_bbox_width = math.ceil(bbox_width / scale)
         s_bbox_height = math.ceil(bbox_height / scale)
+
+        if self.out_width == 0:
+            padding = random.randint(s_bbox_width // 10, s_bbox_width // 8)
+            dst_width = s_bbox_width + padding * 2
 
         s_bbox = (np.around(bbox[0] / scale),
                   np.around(bbox[1] / scale),
                   np.around(bbox[2] / scale),
                   np.around(bbox[3] / scale))
 
-        x_offset, y_offset = self.random_xy_offset(s_bbox_height, s_bbox_width, self.out_height, self.out_width)
-
-        def int_around(val):
-            return int(np.around(val))
+        x_offset, y_offset = self.random_xy_offset(s_bbox_height, s_bbox_width, self.out_height, dst_width)
 
         dst_bbox = (
-            int_around((s_bbox[0] - x_offset) * scale),
-            int_around((s_bbox[1] - y_offset) * scale),
-            int_around(self.out_width * scale),
-            int_around(self.out_height * scale)
+            self.int_around((s_bbox[0] - x_offset) * scale),
+            self.int_around((s_bbox[1] - y_offset) * scale),
+            self.int_around(dst_width * scale),
+            self.int_around(self.out_height * scale)
         )
 
         # It's important do crop first and than do resize for speed consider
         dst = img[dst_bbox[1]:dst_bbox[1] + dst_bbox[3], dst_bbox[0]:dst_bbox[0] + dst_bbox[2]]
 
-        dst = cv2.resize(dst, (self.out_width, self.out_height), interpolation=cv2.INTER_CUBIC)
+        dst = cv2.resize(dst, (dst_width, self.out_height), interpolation=cv2.INTER_CUBIC)
 
         return dst, dst_bbox
+
+    def int_around(self, val):
+        return int(np.around(val))
 
     def get_word_color(self, bg, text_x, text_y, word_height, word_width):
         """
