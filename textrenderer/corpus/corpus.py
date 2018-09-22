@@ -23,7 +23,7 @@ class Corpus(object):
         pass
 
     @abstractmethod
-    def get_sample(self):
+    def get_sample(self, img_index):
         """
         Get word line from corpus in memory
         :return: string

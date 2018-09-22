@@ -38,7 +38,7 @@ class ChnCorpus(Corpus):
             if len(whole_line) > self.length:
                 self.corpus.append(whole_line)
 
-    def get_sample(self):
+    def get_sample(self, img_index):
         # 每次 gen_word，随机选一个预料文件，随机获得长度为 word_length 的字符
         line = random.choice(self.corpus)
 

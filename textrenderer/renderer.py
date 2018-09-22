@@ -41,8 +41,8 @@ class Renderer(object):
         if self.strict:
             self.font_chars = get_fonts_chars(self.fonts, corpus.chars_file)
 
-    def gen_img(self):
-        word, font, word_size = self.pick_font()
+    def gen_img(self, img_index):
+        word, font, word_size = self.pick_font(img_index)
         self.dmsg("after pick font")
 
         # Background's height should much larger than raw word image's height,
@@ -434,13 +434,14 @@ class Renderer(object):
         return out
 
     @retry
-    def pick_font(self):
+    def pick_font(self, img_index):
         """
+        :param img_index when use list corpus, this param is used
         :return:
             font: truetype
             size: word size, removed offset (width, height)
         """
-        word = self.corpus.get_sample()
+        word = self.corpus.get_sample(img_index)
 
         if self.clip_max_chars and len(word) > self.max_chars:
             word = word[:self.max_chars]

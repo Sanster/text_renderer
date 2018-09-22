@@ -62,9 +62,9 @@ def start_listen(q, fname):
 
 
 @retry
-def gen_img_retry(renderer):
+def gen_img_retry(renderer, img_index):
     try:
-        return renderer.gen_img()
+        return renderer.gen_img(img_index)
     except Exception as e:
         print("Retry gen_img: %s" % str(e))
         raise Exception
@@ -75,7 +75,7 @@ def generate_img(img_index, q=None):
     # Make sure different process has different random seed
     np.random.seed()
 
-    im, word = gen_img_retry(renderer)
+    im, word = gen_img_retry(renderer, img_index)
 
     base_name = '{:08d}'.format(img_index)
 

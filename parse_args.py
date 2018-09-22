@@ -36,7 +36,7 @@ def parse_args():
                         help='When corpus_mode is chn or eng, text on image will randomly selected from corpus.'
                              'Recursively find all txt file in corpus_dir')
 
-    parser.add_argument('--corpus_mode', type=str, default='chn', choices=['random', 'chn', 'eng'],
+    parser.add_argument('--corpus_mode', type=str, default='chn', choices=['random', 'chn', 'eng', 'list'],
                         help='Different corpus type have different load/get_sample method'
                              'random: random pick chars from chars file'
                              'chn: pick continuous chars from corpus'
