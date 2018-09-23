@@ -159,7 +159,9 @@ class Renderer(object):
         # We randomly put bounding box of transformed text in the output shape
         # so the max value of dst_height is out_height
 
-        # TODO: prevent text too small
+        # TODO: If rotate angle(z) of text is too big, text will become very small,
+        # we should do something to prevent text too small
+
         # dst_height and dst_width is used to leave some padding around text bbox
         dst_height = random.randint(self.out_height // 4 * 3, self.out_height)
 
