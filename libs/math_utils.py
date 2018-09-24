@@ -56,9 +56,9 @@ def cliped_rand_norm(mu=0, sigma3=1):
 def warpPerspective(src, M33, sl, gpu):
     if gpu:
         from libs.gpu.GpuWrapper import cudaWarpPerspectiveWrapper
-        dst = cudaWarpPerspectiveWrapper(src.astype(np.uint8), M33, (sl, sl), cv2.INTER_CUBIC)
+        dst = cudaWarpPerspectiveWrapper(src.astype(np.uint8), M33, (sl, sl), cv2.INTER_CUBIC, borderValue=(255, 255, 255, 0))
     else:
-        dst = cv2.warpPerspective(src, M33, (sl, sl), flags=cv2.INTER_CUBIC)
+        dst = cv2.warpPerspective(src, M33, (sl, sl), flags=cv2.INTER_CUBIC, borderValue=(255, 255, 255, 0))
     return dst
 
 
@@ -79,15 +79,22 @@ class PerspectiveTransform(object):
         else:
             H, W = src.shape
 
-        M33, sl, _, ptsOut = self.get_warp_matrix(W, H, self.x, self.y, self.z, self.scale, self.fovy)
+        M33, sl, _, ptsOut = self.gen_warp_matrix(W, H)
         sl = int(sl)
 
         dst = warpPerspective(src, M33, sl, gpu)
 
         return dst, M33, ptsOut
 
+    def do_warp_perspective(self, img, text_box_pnts, gpu):
+        dst = warpPerspective(img, self.M33, self.sl, gpu)
+        transformed_pnts = self.transform_pnts(text_box_pnts, self.M33)
+
+        return dst, transformed_pnts
+
     def transform_pnts(self, pnts, M33):
         """
+        Get transformed points after perspectiveTransform
         :param pnts: 2D pnts, left-top, right-top, right-bottom, left-bottom
         :param M33: output from transform_image()
         :return: 2D pnts apply perspective transform
@@ -115,9 +122,15 @@ class PerspectiveTransform(object):
 
         return pin, pout
 
-    def get_warp_matrix(self, W, H, x, y, z, scale, fV):
+    def gen_warp_matrix(self, width, height):
+        x = self.x
+        y = self.y
+        z = self.z
+        scale = self.scale
+        fV = self.fovy
+
         fVhalf = np.deg2rad(fV / 2.)
-        d = np.sqrt(W * W + H * H)
+        d = np.sqrt(width * width + height * height)
         sideLength = scale * d / np.cos(fVhalf)
         h = d / (2.0 * np.sin(fVhalf))
         n = h - (d / 2.0)
@@ -144,18 +157,21 @@ class PerspectiveTransform(object):
         # shape should be 1,4,3 for ptsIn and ptsOut since perspectiveTransform() expects data in this way.
         # In C++, this can be achieved by Mat ptsIn(1,4,CV_64FC3);
         ptsIn = np.array([[
-            [-W / 2., H / 2., 0.],
-            [W / 2., H / 2., 0.],
-            [W / 2., -H / 2., 0.],
-            [-W / 2., -H / 2., 0.]
+            [-width / 2., height / 2., 0.],
+            [width / 2., height / 2., 0.],
+            [width / 2., -height / 2., 0.],
+            [-width / 2., -height / 2., 0.]
         ]])
         ptsOut = cv2.perspectiveTransform(ptsIn, M44)
 
-        ptsInPt2f, ptsOutPt2f = self.get_warped_pnts(ptsIn, ptsOut, W, H, sideLength)
+        ptsInPt2f, ptsOutPt2f = self.get_warped_pnts(ptsIn, ptsOut, width, height, sideLength)
 
         # check float32 otherwise OpenCV throws an error
         assert (ptsInPt2f.dtype == np.float32)
         assert (ptsOutPt2f.dtype == np.float32)
         M33 = cv2.getPerspectiveTransform(ptsInPt2f, ptsOutPt2f).astype(np.float32)
+
+        self.sl = int(sideLength)
+        self.M33 = M33
 
         return M33, sideLength, ptsInPt2f, ptsOutPt2f

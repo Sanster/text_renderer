@@ -24,7 +24,7 @@ curve:
 # Use image in bg_dir as background for text
 img_bg:
   enable: true
-  fraction: 0.5
+  fraction: 1
 
 # Not work when random_space applied
 text_border:
