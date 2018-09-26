@@ -11,7 +11,7 @@ class RandomCorpus(Corpus):
     def load(self):
         pass
 
-    def get_sample(self):
+    def get_sample(self, img_index):
         word = ''
         for _ in range(self.length):
             word += random.choice(self.charsets)
