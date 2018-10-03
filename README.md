@@ -32,17 +32,18 @@ new config file and use it by `--config_file` option), here are some examples:
 |------------|----|
 |Origin(Font size 25)|![origin](./imgs/effects/origin.jpg)|
 |Perspective Transform|![perspective](./imgs/effects/perspective_transform.jpg)|
+|Random Crop|![rand_crop](./imgs/effects/random_crop.jpg)|
 |Curve|![curve](./imgs/effects/curve.jpg)|
-|Emboss|![emboss](./imgs/effects/emboss.jpg)|
 |Light border|![light border](./imgs/effects/light_border.jpg)|
 |Dark border|![dark border](./imgs/effects/dark_border.jpg)|
 |Random char space big|![random char space big](./imgs/effects/random_space_big.jpg)|
 |Random char space small|![random char space small](./imgs/effects/random_space_small.jpg)|
-|Reverse color|![reverse color](./imgs/effects/reverse.jpg)|
-|Blur|![blur](./imgs/effects/blur.jpg)|
 |Middle line|![middle line](./imgs/effects/line_middle.jpg)|
 |Table line|![table line](./imgs/effects/line_table.jpg)|
 |Under line|![under line](./imgs/effects/line_under.jpg)|
+|Emboss|![emboss](./imgs/effects/emboss.jpg)|
+|Reverse color|![reverse color](./imgs/effects/reverse.jpg)|
+|Blur|![blur](./imgs/effects/blur.jpg)|
 
 3. Run `main.py` file.
 

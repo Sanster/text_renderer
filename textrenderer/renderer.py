@@ -49,8 +49,10 @@ class Renderer(object):
         # to make sure we can crop full word image after apply perspective
         bg = self.gen_bg(width=word_size[0] * 8, height=word_size[1] * 8)
         word_img, text_box_pnts, word_color = self.draw_text_on_bg(word, font, bg)
-
         self.dmsg("After draw_text_on_bg")
+
+        if apply(self.cfg.crop):
+            text_box_pnts = self.apply_crop(text_box_pnts, self.cfg.crop)
 
         if apply(self.cfg.line):
             word_img, text_box_pnts = self.liner.apply(word_img, text_box_pnts, word_color)
@@ -573,3 +575,29 @@ class Renderer(object):
 
     def apply_sharp(self, word_img):
         return cv2.filter2D(word_img, -1, self.sharp_kernel)
+
+    def apply_crop(self, text_box_pnts, crop_cfg):
+        """
+        Random crop text box height top or bottom, we don't need image information in this step, only change box pnts
+        :param text_box_pnts: bbox of text [left-top, right-top, right-bottom, left-bottom]
+        :param crop_cfg:
+        :return:
+            croped_text_box_pnts
+        """
+        height = abs(text_box_pnts[0][1] - text_box_pnts[3][1])
+        scale = float(height) / float(self.out_height)
+
+        croped_text_box_pnts = text_box_pnts
+
+        if prob(0.5):
+            top_crop = int(random.randint(crop_cfg.top.min, crop_cfg.top.max) * scale)
+            self.dmsg("top crop %d" % top_crop)
+            croped_text_box_pnts[0][1] += top_crop
+            croped_text_box_pnts[1][1] += top_crop
+        else:
+            bottom_crop = int(random.randint(crop_cfg.bottom.min, crop_cfg.bottom.max) * scale)
+            self.dmsg("bottom crop %d " % bottom_crop)
+            croped_text_box_pnts[2][1] -= bottom_crop
+            croped_text_box_pnts[3][1] -= bottom_crop
+
+        return croped_text_box_pnts

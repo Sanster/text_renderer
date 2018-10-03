@@ -20,6 +20,18 @@ curve:
   min: 1 # sin 函数的幅值范围
   max: 5
 
+# random crop text height
+crop:
+  enable: false
+  fraction: 0.5
+
+  # top and bottom will applied equally
+  top:
+    min: 5
+    max: 10 # in pixel, this value should small than img_height
+  bottom:
+    min: 5
+    max: 10 # in pixel, this value should small than img_height
 
 # Use image in bg_dir as background for text
 img_bg:
@@ -44,9 +56,9 @@ text_border:
 # https://docs.opencv.org/3.4/df/da0/group__photo__clone.html#ga2bf426e4c93a6b1f21705513dfeca49d
 # https://www.cs.virginia.edu/~connelly/class/2014/comp_photo/proj2/poisson.pdf
 # Use opencv seamlessClone() to draw text on background
-# This will make text image looks more natural
+# For some background image, this will make text image looks more real
 seamless_clone:
-  enable: true
+  enable: false
   fraction: 0.5
 
 perspective_transform:
