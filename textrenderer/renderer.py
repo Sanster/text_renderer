@@ -10,7 +10,7 @@ from libs.utils import draw_box, draw_bbox, prob, apply
 from libs.timer import Timer
 from textrenderer.liner import Liner
 from textrenderer.noiser import Noiser
-from libs.font_utils import get_fonts_chars
+import libs.font_utils as font_utils
 
 # noinspection PyMethodMayBeStatic
 from textrenderer.remaper import Remaper
@@ -39,7 +39,7 @@ class Renderer(object):
         self.create_kernals()
 
         if self.strict:
-            self.font_chars = get_fonts_chars(self.fonts, corpus.chars_file)
+            self.font_unsupport_chars = font_utils.get_unsupported_chars(self.fonts, corpus.chars_file)
 
     def gen_img(self, img_index):
         word, font, word_size = self.pick_font(img_index)
@@ -461,11 +461,11 @@ class Renderer(object):
         font_path = random.choice(self.fonts)
 
         if self.strict:
-            supported_chars = self.font_chars[font_path]
+            unsupport_chars = self.font_unsupport_chars[font_path]
             for c in word:
                 if c == ' ':
                     continue
-                if c not in supported_chars:
+                if c in unsupport_chars:
                     print('Retry pick_font(), \'%s\' contains chars \'%s\' not supported by font %s' % (
                         word, c, font_path))
                     raise Exception

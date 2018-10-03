@@ -89,7 +89,9 @@ def get_fonts_chars(fonts, chars_file):
     loads/saves font supported chars from cache file
     :param fonts: list of font path. e.g ['./data/fonts/msyh.ttc']
     :param chars_file: arg from parse_args
-    :return: dict, key -> font_path, value -> font supported chars
+    :return: dict
+        key -> font_path
+        value -> font supported chars
     """
     out = {}
 
@@ -121,6 +123,25 @@ def get_fonts_chars(fonts, chars_file):
         out[font_path] = supported_chars
 
     return out
+
+
+def get_unsupported_chars(fonts, chars_file):
+    """
+    Get fonts unsupported chars by loads/saves font supported chars from cache file
+    :param fonts:
+    :param chars_file:
+    :return: dict
+        key -> font_path
+        value -> font unsupported chars
+    """
+    charset = load_chars(chars_file)
+    charset = ''.join(charset)
+    fonts_chars = get_fonts_chars(fonts, chars_file)
+    fonts_unsupported_chars = {}
+    for font_path, chars in fonts_chars.items():
+        unsupported_chars = list(filter(lambda x: x not in charset, chars))
+        fonts_unsupported_chars[font_path] = unsupported_chars
+    return fonts_unsupported_chars
 
 
 if __name__ == '__main__':

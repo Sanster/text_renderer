@@ -67,6 +67,7 @@ def gen_img_retry(renderer, img_index):
         return renderer.gen_img(img_index)
     except Exception as e:
         print("Retry gen_img: %s" % str(e))
+        traceback.print_exc()
         raise Exception
 
 
