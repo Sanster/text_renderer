@@ -1,7 +1,7 @@
 # Small font_size will make text looks like blured/prydown
 font_size:
-  min: 15
-  max: 30
+  min: 14
+  max: 23
 
 # By default, text is drawed by Pillow with (https://stackoverflow.com/questions/43828955/measuring-width-of-text-python-pil)
 # If `random_space` is enabled, some text will be drawed char by char with a random space
