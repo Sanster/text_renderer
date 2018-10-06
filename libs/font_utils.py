@@ -139,7 +139,7 @@ def get_unsupported_chars(fonts, chars_file):
     fonts_chars = get_fonts_chars(fonts, chars_file)
     fonts_unsupported_chars = {}
     for font_path, chars in fonts_chars.items():
-        unsupported_chars = list(filter(lambda x: x not in charset, chars))
+        unsupported_chars = list(filter(lambda x: x not in chars, charset))
         fonts_unsupported_chars[font_path] = unsupported_chars
     return fonts_unsupported_chars
 
