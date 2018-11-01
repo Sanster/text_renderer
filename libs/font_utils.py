@@ -66,11 +66,11 @@ def check_font_chars(ttf, charset):
     :param charset: chars
     :return: unsupported_chars, supported_chars
     """
-    chars = chain.from_iterable([y + (Unicode[y[0]],) for y in x.cmap.items()] for x in ttf["cmap"].tables)
-
-    chars_int = []
-    for c in chars:
-        chars_int.append(c[0])
+    #chars = chain.from_iterable([y + (Unicode[y[0]],) for y in x.cmap.items()] for x in ttf["cmap"].tables)
+    chars_int=set()
+    for table in ttf['cmap'].tables:
+        for k,v in table.cmap.items():
+            chars_int.add(k)            
 
     unsupported_chars = []
     supported_chars = []
