@@ -3,7 +3,7 @@ from easydict import EasyDict
 
 
 def load_config(filepath):
-    with open(filepath, mode='r') as f:
+    with open(filepath, mode='r',encoding='utf-8') as f:
         cfg = yaml.load(f.read())
         cfg = EasyDict(cfg)
 
