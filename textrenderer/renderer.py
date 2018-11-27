@@ -422,7 +422,7 @@ class Renderer(object):
         """
         Resize background, let bg_width>=width, bg_height >=height, and random crop from resized background
         """
-        assert width > height
+        assert width > height        
 
         bg = random.choice(self.bgs)
 
@@ -475,6 +475,7 @@ class Renderer(object):
 
         # Font size in point
         font_size = random.randint(self.cfg.font_size.min, self.cfg.font_size.max)
+        
         font = ImageFont.truetype(font_path, font_size)
 
         return word, font, self.get_word_size(font, word)
@@ -492,6 +493,7 @@ class Renderer(object):
         size = (size[0] - offset[0], size[1] - offset[1])
         return size
 
+
     def apply_perspective_transform(self, img, text_box_pnts, max_x, max_y, max_z, gpu=False):
         """
         Apply perspective transform on image
@@ -505,19 +507,28 @@ class Renderer(object):
             dst_img_pnts: points of whole word image after apply perspective transform
             dst_text_pnts: points of text after apply perspective transform
         """
+        degree = 100 
+        while True:
+            x = math_utils.cliped_rand_norm(0, max_x)
+            y = math_utils.cliped_rand_norm(0, max_y)
+            z = math_utils.cliped_rand_norm(0, max_z)
 
-        x = math_utils.cliped_rand_norm(0, max_x)
-        y = math_utils.cliped_rand_norm(0, max_y)
-        z = math_utils.cliped_rand_norm(0, max_z)
+            #print("x: %f, y: %f, z: %f" % (x, y, z))
 
-        # print("x: %f, y: %f, z: %f" % (x, y, z))
+            transformer = math_utils.PerspectiveTransform(x, y, z, scale=1.0, fovy=50)
+            dst_img, M33, dst_img_pnts = transformer.transform_image(img, gpu)
+            dst_text_pnts = transformer.transform_pnts(text_box_pnts, M33)
 
-        transformer = math_utils.PerspectiveTransform(x, y, z, scale=1.0, fovy=50)
-
-        dst_img, M33, dst_img_pnts = transformer.transform_image(img, gpu)
-        dst_text_pnts = transformer.transform_pnts(text_box_pnts, M33)
-
-        return dst_img, dst_img_pnts, dst_text_pnts
+            #不要旋转过多角度
+            degree = np.arctan2( dst_text_pnts[0][1] - dst_text_pnts[1][1],
+                                dst_text_pnts[0][0] - dst_text_pnts[1][0])*180 / np.pi
+            degree = np.abs(degree)
+            degree = degree if degree < 90 else 180 - degree
+            
+            if(degree <= 5):
+                return dst_img, dst_img_pnts, dst_text_pnts
+            #else:
+            #    print('degree =',degree)
 
     def apply_blur_on_output(self, img):
         if prob(0.5):
