@@ -47,7 +47,9 @@ class Renderer(object):
 
         # Background's height should much larger than raw word image's height,
         # to make sure we can crop full word image after apply perspective
-        bg = self.gen_bg(width=word_size[0] * 8, height=word_size[1] * 8)
+        bg = self.gen_bg(width = max(word_size[0] * 4,500), height=max(word_size[1] * 4,120))
+        #print(bg.shape[0],'->',bg.shape[1])
+
         word_img, text_box_pnts, word_color = self.draw_text_on_bg(word, font, bg)
         self.dmsg("After draw_text_on_bg")
 
@@ -100,6 +102,9 @@ class Renderer(object):
             if apply(self.cfg.prydown):
                 word_img = self.apply_prydown(word_img)
                 self.dmsg("After prydown")
+            
+            if apply(self.cfg.pryup):
+                word_img = self.apply_pryup(word_img)
 
         word_img = np.clip(word_img, 0., 255.)
 
@@ -215,9 +220,11 @@ class Renderer(object):
         xmax = text_x + word_width + offset
 
         word_roi_bg = bg[ymin: ymax, xmin: xmax]
-
-        bg_mean = int(np.mean(word_roi_bg) * (2 / 3))
-        word_color = random.randint(0, bg_mean)
+        bg_mean = np.mean(word_roi_bg)
+        word_color = int(bg_mean * (2 / 3))
+        word_color = random.randint(0, word_color)
+        #保证字体和背景最少有20个灰度差
+        word_color = word_color if (bg_mean - word_color) > 20 else min(0,(bg_mean - 20))
         return word_color
 
     def draw_text_on_bg(self, word, font, bg):
@@ -435,11 +442,13 @@ class Renderer(object):
 
         x_offset, y_offset = self.random_xy_offset(height, width, out.shape[0], out.shape[1])
 
+        #print(height, width, out.shape[0], out.shape[1],x_offset,y_offset)
+
         out = out[y_offset:y_offset + height, x_offset:x_offset + width]
 
-        #out = self.apply_gauss_blur(out, ks=[7, 11, 13, 15, 17])
+        out = self.apply_gauss_blur(out, ks=[7, 11, 13, 15, 17])
 
-        bg_mean = int(np.mean(out))
+        #bg_mean = int(np.mean(out))
 
         # TODO: find a better way to deal with background
         # alpha = 255 / bg_mean  # 对比度
@@ -525,27 +534,23 @@ class Renderer(object):
             degree = np.abs(degree)
             degree = degree if degree < 90 else 180 - degree
             
-            if(degree <= 5):
+            if(degree <= 2):
                 return dst_img, dst_img_pnts, dst_text_pnts
             #else:
             #    print('degree =',degree)
 
     def apply_blur_on_output(self, img):
         if prob(0.5):
-            return self.apply_gauss_blur(img, [3, 5])
+            return self.apply_gauss_blur(img)
         else:
             return self.apply_norm_blur(img)
 
-    def apply_gauss_blur(self, img, ks=None):
-        if ks is None:
-            ks = [7, 9, 11, 13]
-        ksize = random.choice(ks)
+    def apply_gauss_blur(self, img, sigmas=None):
+        if sigmas is None:
+            sigmas = np.arange(0.1,1.01,0.1)
 
-        sigmas = [0, 1, 2, 3, 4, 5, 6, 7]
-        sigma = 0
-        if ksize <= 3:
-            sigma = random.choice(sigmas)
-        img = cv2.GaussianBlur(img, (ksize, ksize), sigma)
+        sigma = random.choice(sigmas)
+        img = cv2.GaussianBlur(img, (0, 0), sigma)
         return img
 
     def apply_norm_blur(self, img, ks=None):
@@ -566,6 +571,17 @@ class Renderer(object):
 
         out = cv2.resize(img, (int(width / scale), int(height / scale)), interpolation=cv2.INTER_AREA)
         return cv2.resize(out, (width, height), interpolation=cv2.INTER_AREA)
+
+    def apply_pryup(self, img):
+        """
+        模拟失真 ,近邻插值
+        """
+        scale = np.random.choice([0.8,0.9,1.1,1.25,1.35])
+        height = img.shape[0]
+        width = img.shape[1]
+
+        out = cv2.resize(img,None,fx = scale,fy = scale, interpolation=cv2.INTER_NEAREST)
+        return cv2.resize(out, (width, height), interpolation=cv2.INTER_NEAREST)
 
     def reverse_img(self, word_img):
         offset = np.random.randint(-10, 10)

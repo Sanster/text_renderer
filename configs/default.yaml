@@ -1,6 +1,6 @@
 # Small font_size will make text looks like blured/prydown
 font_size:
-  min: 14
+  min: 16
   max: 23
 
 # By default, text is drawed by Pillow with (https://stackoverflow.com/questions/43828955/measuring-width-of-text-python-pil)
@@ -36,7 +36,7 @@ crop:
 # Use image in bg_dir as background for text
 img_bg:
   enable: true
-  fraction: 0.5
+  fraction: 0.95
 
 # Not work when random_space applied
 text_border:
@@ -68,13 +68,17 @@ perspective_transform:
 
 blur:
   enable: true
-  fraction: 0.03
+  fraction: 0.1
 
 # If an image is applied blur, it will not be applied prydown
 prydown:
+  enable: false
+  fraction: 0.1
+  max_scale: 1.5
+
+pryup:
   enable: true
-  fraction: 0.03
-  max_scale: 1.5 # Image will first resize to 1.5x, and than resize to 1x
+  fraction: 0.05
 
 noise:
   enable: true
@@ -97,20 +101,20 @@ noise:
     fraction: 0.25
 
 line:
-  enable: false
+  enable: true
   fraction: 0.05
 
   under_line:
-    enable: false
-    fraction: 0.2
+    enable: true
+    fraction: 1.0
 
   table_line:
     enable: false
-    fraction: 0.3
+    fraction: 0.0
 
   middle_line:
     enable: false
-    fraction: 0.5
+    fraction: 0.0
 
 # These operates are applied on the final output image,
 # so actually it can also be applied in training process as an data augmentation method.

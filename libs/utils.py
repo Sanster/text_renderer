@@ -93,8 +93,9 @@ def load_bgs(bg_dir):
 
 
 def load_chars(filepath):
+    filespath = os.path.abspath(filepath)
     if not os.path.exists(filepath):
-        print("Chars file not exists.")
+        print("Chars file {} not exists.".format(filepath))
         exit(1)
 
     ret = ''
@@ -104,6 +105,7 @@ def load_chars(filepath):
             if not line:
                 break
             ret += line[0]
+    print(len(ret))
     return ret
 
 

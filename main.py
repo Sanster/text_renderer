@@ -28,7 +28,8 @@ STOP_TOKEN = 'kill'
 flags = parse_args()
 cfg = load_config(flags.config_file)
 
-fonts = font_utils.get_font_paths_from_list(flags.fonts_list)
+#fonts = font_utils.get_font_paths_from_list(flags.fonts_list)
+fonts = font_utils.get_font_paths(flags.fonts_dir)
 bgs = utils.load_bgs(flags.bg_dir)
 
 corpus = corpus_factory(flags.corpus_mode, flags.chars_file, flags.corpus_dir, flags.length)
@@ -129,7 +130,6 @@ def get_num_processes(flags):
         processes = max(os.cpu_count(), 2)
     return processes
 
-
 if __name__ == "__main__":
     # It seems there are some problems when using opencv in multiprocessing fork way
     # https://github.com/opencv/opencv/issues/5150#issuecomment-161371095
@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
     timer = Timer(Timer.SECOND)
     timer.start()
-    with mp.Pool(processes=get_num_processes(flags)) as pool:
+    with mp.Pool(processes=4) as pool:
         if not flags.viz:
             pool.apply_async(start_listen, (q, tmp_label_path))
 
