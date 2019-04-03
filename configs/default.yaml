@@ -20,6 +20,19 @@ curve:
   min: 1 # sin 函数的幅值范围
   max: 5
 
+#水平方向拉伸
+stretch:
+  enable: true
+  fraction: 1.0
+  min: 0.8
+  max: 1.2
+
+#扭曲
+rdistort:
+  enable: true
+  fraction: 0.1
+
+
 # random crop text height
 crop:
   enable: false
@@ -68,7 +81,7 @@ perspective_transform:
 
 blur:
   enable: true
-  fraction: 0.1
+  fraction: 0.3
 
 # If an image is applied blur, it will not be applied prydown
 prydown:

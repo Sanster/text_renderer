@@ -13,6 +13,7 @@ class npyChnCorpus(Corpus):
     """
     def load(self):
         npyfiles = glob.glob(self.corpus_dir+'/**.npy')
+        print('find corpus:',npyfiles)
         for npyfile in npyfiles:
             self.corpus += np.load(npyfile).tolist()
         self.lines = len(self.corpus)

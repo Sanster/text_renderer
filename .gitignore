@@ -32,3 +32,4 @@ data/fonts/chn/msyh.ttc
 data/chars/eng.txt
 *.jpg
 *.png
+*.npy

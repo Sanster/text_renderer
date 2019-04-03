@@ -4,6 +4,8 @@ import numpy as np
 import cv2
 from PIL import ImageFont, Image, ImageDraw
 from tenacity import retry
+from scipy.ndimage import filters, measurements, interpolation
+
 
 import libs.math_utils as math_utils
 from libs.utils import draw_box, draw_bbox, prob, apply
@@ -52,6 +54,11 @@ class Renderer(object):
 
         word_img, text_box_pnts, word_color = self.draw_text_on_bg(word, font, bg)
         self.dmsg("After draw_text_on_bg")
+
+        #随机宽度拉伸
+        if(apply(self.cfg.stretch)):
+            word_img,text_box_pnts = self.stretch_img_w(word_img,text_box_pnts)
+
 
         if apply(self.cfg.crop):
             text_box_pnts = self.apply_crop(text_box_pnts, self.cfg.crop)
@@ -120,6 +127,9 @@ class Renderer(object):
             word_img = self.apply_sharp(word_img)
             self.dmsg("After sharp")
 
+        if apply(self.cfg.rdistort):
+            word_img = self.rdistort(word_img)
+
         return word_img, word
 
     def dmsg(self, msg):
@@ -170,7 +180,8 @@ class Renderer(object):
         # we should do something to prevent text too small
 
         # dst_height and dst_width is used to leave some padding around text bbox
-        dst_height = random.randint(self.out_height // 4 * 3, self.out_height)
+        dst_height = random.randint(self.out_height//4 * 3, self.out_height-2)
+        #dst_height = random.randint(20, self.out_height)
 
         if self.out_width == 0:
             scale = bbox_height / dst_height
@@ -206,6 +217,38 @@ class Renderer(object):
 
         return dst, dst_bbox
 
+    def stretch_img_w(self,img,text_box_pnts):
+        '''
+        宽度方向进行拉伸
+        '''
+        min = self.cfg.stretch.min
+        max = self.cfg.stretch.max
+        scale = np.random.uniform(min,max)
+
+        img = cv2.resize(img,None,fx = scale,fy = 1.0,interpolation = cv2.INTER_CUBIC)
+        text_box_pnts[0][0]  = int( text_box_pnts[0][0] * scale)
+        text_box_pnts[1][0]  = int( text_box_pnts[1][0] * scale)
+        text_box_pnts[2][0]  = int( text_box_pnts[2][0] * scale)
+        text_box_pnts[3][0]  = int( text_box_pnts[3][0] * scale)
+        return img,text_box_pnts
+        
+    def rdistort(self,image, distort=1.0, dsigma=5.0):
+
+        h, w =image.shape
+        hs = np.random.randn(h, w)
+        ws = np.random.randn(h, w)
+        hs = filters.gaussian_filter(hs, dsigma)
+        ws = filters.gaussian_filter(ws, dsigma)
+        hs *= distort/np.amax(hs)
+        ws *= distort/np.amax(ws)
+        #cval = np.amax(image)
+
+        def f(p):
+            return p[0]+hs[p[0], p[1]], p[1]+ws[p[0], p[1]]
+
+        return interpolation.geometric_transform(image, f, output_shape=(h, w), order=1, mode='nearest')
+
+
     def int_around(self, val):
         return int(np.around(val))
 
@@ -220,12 +263,55 @@ class Renderer(object):
         xmax = text_x + word_width + offset
 
         word_roi_bg = bg[ymin: ymax, xmin: xmax]
-        bg_mean = np.mean(word_roi_bg)
+
+        #去掉亮色区域
+        word_roi_bg = word_roi_bg[word_roi_bg<225]
+        bg_mean = 0 
+        if(len(word_roi_bg)<=0):
+            bg_mean = 225
+        else:
+            bg_mean = np.mean(word_roi_bg)
         word_color = int(bg_mean * (2 / 3))
         word_color = random.randint(0, word_color)
-        #保证字体和背景最少有20个灰度差
-        word_color = word_color if (bg_mean - word_color) > 20 else min(0,(bg_mean - 20))
+        #保证字体和背景最少有60个灰度差
+        word_color = word_color if (bg_mean - word_color) > 60 else max(0,(bg_mean - 60))
+        
         return word_color
+
+
+    def draw_sum_on_bg(self,bg,sum,word,font):
+        bg_height = bg.shape[0]
+        bg_width = bg.shape[1]
+
+        word_size = self.get_word_size(font, word)
+        word_height = word_size[1]
+        word_width = word_size[0]
+
+        
+        x1 = int((bg_width - word_width) / 2)
+        y1 = int((bg_height - word_height) / 2)
+        x2 = x1 + word_width
+        y2 = y1 + word_height
+
+        random_x = np.random.randint(x1,x2)
+        random_y = np.random.randint(y1,y2)
+
+        center = (bg.shape[1] // 2, bg.shape[0] // 2)
+
+        # opencv seamlessClone require bgr image
+        text_img_bgr = np.ones((text_img.shape[0], text_img.shape[1], 3), np.uint8)
+        bg_bgr = np.ones((bg.shape[0], bg.shape[1], 3), np.uint8)
+        cv2.cvtColor(text_img, cv2.COLOR_GRAY2BGR, text_img_bgr)
+        cv2.cvtColor(bg, cv2.COLOR_GRAY2BGR, bg_bgr)
+
+        flag  = cv2.MIXED_CLONE
+
+        mixed_clone = cv2.seamlessClone(text_img_bgr, bg_bgr, text_mask, center, flag)
+
+        np_img = cv2.cvtColor(mixed_clone, cv2.COLOR_BGR2GRAY)
+
+
+
 
     def draw_text_on_bg(self, word, font, bg):
         """
@@ -307,11 +393,12 @@ class Renderer(object):
         cv2.cvtColor(text_img, cv2.COLOR_GRAY2BGR, text_img_bgr)
         cv2.cvtColor(bg, cv2.COLOR_GRAY2BGR, bg_bgr)
 
-        flag = np.random.choice([
-            cv2.NORMAL_CLONE,
-            cv2.MIXED_CLONE,
-            cv2.MONOCHROME_TRANSFER
-        ])
+        #flag = np.random.choice([
+        #    cv2.NORMAL_CLONE,
+        #    cv2.MIXED_CLONE,
+        #    cv2.MONOCHROME_TRANSFER
+        #])
+        flag  = cv2.MIXED_CLONE
 
         mixed_clone = cv2.seamlessClone(text_img_bgr, bg_bgr, text_mask, center, flag)
 
@@ -446,7 +533,7 @@ class Renderer(object):
 
         out = out[y_offset:y_offset + height, x_offset:x_offset + width]
 
-        out = self.apply_gauss_blur(out, ks=[7, 11, 13, 15, 17])
+        #out = self.apply_gauss_blur(out)
 
         #bg_mean = int(np.mean(out))
 
@@ -484,6 +571,7 @@ class Renderer(object):
 
         # Font size in point
         font_size = random.randint(self.cfg.font_size.min, self.cfg.font_size.max)
+        
         
         font = ImageFont.truetype(font_path, font_size)
 
@@ -547,7 +635,7 @@ class Renderer(object):
 
     def apply_gauss_blur(self, img, sigmas=None):
         if sigmas is None:
-            sigmas = np.arange(0.1,1.01,0.1)
+            sigmas = np.arange(0.1,0.6,0.1)
 
         sigma = random.choice(sigmas)
         img = cv2.GaussianBlur(img, (0, 0), sigma)
@@ -569,8 +657,8 @@ class Renderer(object):
         height = img.shape[0]
         width = img.shape[1]
 
-        out = cv2.resize(img, (int(width / scale), int(height / scale)), interpolation=cv2.INTER_AREA)
-        return cv2.resize(out, (width, height), interpolation=cv2.INTER_AREA)
+        out = cv2.resize(img, (int(width / scale), int(height / scale)), interpolation=cv2.INTER_NEAREST)
+        return cv2.resize(out, (width, height), interpolation=cv2.INTER_NEAREST)
 
     def apply_pryup(self, img):
         """
@@ -580,8 +668,8 @@ class Renderer(object):
         height = img.shape[0]
         width = img.shape[1]
 
-        out = cv2.resize(img,None,fx = scale,fy = scale, interpolation=cv2.INTER_NEAREST)
-        return cv2.resize(out, (width, height), interpolation=cv2.INTER_NEAREST)
+        out = cv2.resize(img,None,fx = scale,fy = scale, interpolation=cv2.INTER_LINEAR)
+        return cv2.resize(out, (width, height), interpolation=cv2.INTER_LINEAR)
 
     def reverse_img(self, word_img):
         offset = np.random.randint(-10, 10)
