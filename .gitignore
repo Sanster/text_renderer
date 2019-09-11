@@ -24,3 +24,12 @@ libs/gpu/build/
 output/
 .caches
 
+data/chars/eng.txt
+*.txt
+data/chars/chn.txt
+data/fonts/chn/msyh.ttc
+data/fonts/chn/msyh.ttc
+data/chars/eng.txt
+*.jpg
+*.png
+*.npy
