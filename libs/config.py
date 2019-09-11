@@ -4,7 +4,7 @@ from easydict import EasyDict
 
 def load_config(filepath):
     with open(filepath, mode='r',encoding='utf-8') as f:
-        cfg = yaml.load(f.read())
+        cfg = yaml.load(f.read(),Loader=yaml.FullLoader)
         cfg = EasyDict(cfg)
 
     check_fraction(cfg.noise, 'noise')
