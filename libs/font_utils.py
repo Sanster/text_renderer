@@ -27,7 +27,7 @@ def get_font_paths(fonts_dir):
 
 
 def get_font_paths_from_list(list_filename):
-    with open(list_filename) as f:
+    with open(list_filename,encoding="utf-8") as f:
         lines = f.readlines()
         fonts = [os.path.abspath(l.strip()) for l in lines]
 
