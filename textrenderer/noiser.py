@@ -41,11 +41,11 @@ class Noiser(object):
         """
         Gaussian-distributed additive noise.
         """
-        row, col = img.shape
+        row, col, channel = img.shape
 
         mean = 0
         stddev = np.sqrt(15)
-        gauss_noise = np.zeros((row, col))
+        gauss_noise = np.zeros((row, col, channel))
         cv2.randn(gauss_noise, mean, stddev)
         out = img + gauss_noise
 
@@ -55,10 +55,10 @@ class Noiser(object):
         """
         Apply zero-mean uniform noise
         """
-        row, col = img.shape
+        row, col, channel = img.shape
         alpha = 0.05
-        gauss = np.random.uniform(0 - alpha, alpha, (row, col))
-        gauss = gauss.reshape(row, col)
+        gauss = np.random.uniform(0 - alpha, alpha, (row, col, channel))
+        gauss = gauss.reshape(row, col, channel)
         out = img + img * gauss
         return out
 
@@ -66,7 +66,7 @@ class Noiser(object):
         """
         Salt and pepper noise. Replaces random pixels with 0 or 255.
         """
-        row, col = img.shape
+        row, col, channel = img.shape
         s_vs_p = 0.5
         amount = np.random.uniform(0.004, 0.01)
         out = np.copy(img)

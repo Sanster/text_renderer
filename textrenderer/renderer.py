@@ -399,10 +399,7 @@ class Renderer(object):
         draw.text((x, y), text, font=font, fill=text_color)
 
     def gen_bg(self, width, height):
-        if apply(self.cfg.img_bg):
-            bg = self.gen_bg_from_image(int(width), int(height))
-        else:
-            bg = self.gen_rand_bg(int(width), int(height))
+        bg = self.gen_bg_from_image(int(width), int(height))
         return bg
 
     def gen_rand_bg(self, width, height):
