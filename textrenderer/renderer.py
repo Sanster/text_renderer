@@ -206,21 +206,19 @@ class Renderer(object):
     def int_around(self, val):
         return int(np.around(val))
 
-    def get_word_color(self, bg, text_x, text_y, word_height, word_width):
-        """
-        Only use word roi area to get word color
-        """
-        offset = 10
-        ymin = text_y - offset
-        ymax = text_y + word_height + offset
-        xmin = text_x - offset
-        xmax = text_x + word_width + offset
-
-        word_roi_bg = bg[ymin: ymax, xmin: xmax]
-
-        bg_mean = int(np.mean(word_roi_bg) * (2 / 3))
-        word_color = random.randint(0, bg_mean)
-        return word_color
+    def get_word_color(self):
+        colors = [i for i in self.cfg.font_color]
+        p = [self.cfg.font_color[i].fraction for i in self.cfg.font_color]
+        color_name = np.random.choice(colors, p=p)
+        l_boundary = [int(i) for i in self.cfg.font_color[color_name].l_boundary.split(',')]
+        h_boundary = [int(i) for i in self.cfg.font_color[color_name].h_boundary.split(',')]
+        if color_name == 'black' or color_name == 'gray':
+            r = g = b = np.random.randint(l_boundary[0], h_boundary[0])
+        else:
+            r = np.random.randint(l_boundary[0], h_boundary[0])
+            g = np.random.randint(l_boundary[1], h_boundary[1])
+            b = np.random.randint(l_boundary[2], h_boundary[2])
+        return (r,g,b)
 
     def draw_text_on_bg(self, word, font, bg):
         """
@@ -249,7 +247,7 @@ class Renderer(object):
         text_x = int((bg_width - word_width) / 2)
         text_y = int((bg_height - word_height) / 2)
 
-        word_color = self.get_word_color(bg, text_x, text_y, word_height, word_width)
+        word_color = self.get_word_color()
 
         if apply(self.cfg.random_space):
             text_x, text_y, word_width, word_height = self.draw_text_with_random_space(draw, font, word, word_color,

@@ -3,6 +3,25 @@ font_size:
   min: 14
   max: 23
 
+# choose font_color range
+font_color:
+  black:
+    fraction: 0.3
+    l_boundary: 0,0,0
+    h_boundary: 64,64,64
+  gray:
+    fraction: 0.4
+    l_boundary: 77,77,77
+    h_boundary: 230,230,230
+  blue:
+    fraction: 0.2
+    l_boundary: 0,0,150
+    h_boundary: 96,96,255
+  brown:
+    fraction: 0.1
+    l_boundary: 122,102,0
+    h_boundary: 255,170,60
+
 # By default, text is drawed by Pillow with (https://stackoverflow.com/questions/43828955/measuring-width-of-text-python-pil)
 # If `random_space` is enabled, some text will be drawed char by char with a random space
 random_space:
@@ -36,7 +55,7 @@ crop:
 # Use image in bg_dir as background for text
 img_bg:
   enable: true
-  fraction: 0.5
+  fraction: 1
 
 # Not work when random_space applied
 text_border:
@@ -73,7 +92,7 @@ blur:
 # If an image is applied blur, it will not be applied prydown
 prydown:
   enable: true
-  fraction: 0.03
+  fraction: 0.06
   max_scale: 1.5 # Image will first resize to 1.5x, and than resize to 1x
 
 noise:
@@ -97,8 +116,8 @@ noise:
     fraction: 0.25
 
 line:
-  enable: false
-  fraction: 0.05
+  enable: true
+  fraction: 0.08
 
   under_line:
     enable: false
