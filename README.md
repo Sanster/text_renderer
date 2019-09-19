@@ -1,32 +1,28 @@
-# Text Renderer
-Generate text images for training deep learning OCR model (e.g. [CRNN](https://github.com/bgshih/crnn)).
+# 项目简介
+基于原[text_render](https://github.com/Sanster/text_renderer) 根据自己的需求做了一些修改；
+主要增加了对于色彩的支持(包含文字色彩与背景色彩图)；
 Support both latin and non-latin text.
 
-# Setup
 - Ubuntu 16.04
 - python 3.5+
 
 Install dependencies:
 ```
 pip3 install -r requirements.txt
+
+Python3 main.py
 ```
 
 # Demo
-By default, simply run `python3 main.py` will generate 20 text images
-and a labels.txt file in `output/default/`.
+![example1.jpg](./imgs/example1_c.jpg)
+![example2.jpg](./imgs/example2_c.jpg)
 
-![example1.jpg](./imgs/example1.jpg)
-![example2.jpg](./imgs/example2.jpg)
+![example3.jpg](./imgs/example3_c.jpg)
+![example4.jpg](./imgs/example4_c.jpg)
 
-![example3.jpg](./imgs/example3.jpg)
-![example4.jpg](./imgs/example4.jpg)
-
-# Use your own data to generate image
-1. Please run `python3 main.py --help` to see all optional arguments and their meanings.
-And put your own data in corresponding folder.
-
-2. Config text effects and fraction in `configs/default.yaml` file(or create a
-new config file and use it by `--config_file` option), here are some examples:
+# 文字变换特效
+编辑 `configs/default.yaml` 来实现文字弯曲，模糊等效果，详见原[text_render](https://github.com/Sanster/text_renderer);
+新增表格线颜色控制，字体颜色控制，添加冗余文字
 
 |Effect name|Image|
 |------------|----|
@@ -44,8 +40,36 @@ new config file and use it by `--config_file` option), here are some examples:
 |Emboss|![emboss](./imgs/effects/emboss.jpg)|
 |Reverse color|![reverse color](./imgs/effects/reverse.jpg)|
 |Blur|![blur](./imgs/effects/blur.jpg)|
+|font_color|![font_color](./imgs/effects/colored.jpg)|
+|line_color|![line_color](./imgs/effects/table.jpg)|
+|extra_words|![extra_words](./imgs/effects/extra.jpg)|
 
-3. Run `main.py` file.
+颜色配置说明:
+程序会随机拾取下方所配置颜色种类(按照fraction中的概率，所有颜色fraction相加需要等于1)，选中颜色种类后，rgb由l_boundary与h_boundary中取一个随机数确定； font_color 同理
+```
+line_color:
+  black:
+    fraction: 0.3
+    l_boundary: 0,0,0
+    h_boundary: 64,64,64
+  gray:
+    fraction: 0.7
+    l_boundary: 77,77,77
+    h_boundary: 230,230,230
+```
+冗余文字说明:
+如开启选项，程序会按照设定的总概率随机选取一段独立的文字(颜色，字体及字号大小均采用正文的设置)，生成的文字长度在1到最长文本长度之间随机。 top 与 bottom 中的 fraction 决定了冗余文字生成在上方或下方的概率；
+*注:由于冗余文字尽量生成在上方与下方，所以可能生成在图片之外，所以最终出现的概率会小于设定值；
+```
+extra_words:
+  enable: true
+  fraction: 0.05
+  top:
+    fraction: 0.5
+  bottom:
+    fraction: 0.5
+```
+
 
 # Strict mode
 For no-latin language(e.g Chinese), it's very common that some fonts only support
@@ -91,4 +115,5 @@ You can see how perspectiveTransform works and all bounding/rotated boxes.
 
 
 # Todo
-See https://github.com/Sanster/text_renderer/projects/1
+- 增加同一张图中不同字体、大小与颜色的设置；
+- 增加文字侵蚀，打印不完整的效果；
