@@ -1,9 +1,10 @@
 # Small font_size will make text looks like blured/prydown
 font_size:
-  min: 14
-  max: 23
+  min: 12
+  max: 32
 
 # choose font_color range
+# color boundary is in R,G,B format
 font_color:
   black:
     fraction: 0.3
@@ -16,11 +17,23 @@ font_color:
   blue:
     fraction: 0.2
     l_boundary: 0,0,150
-    h_boundary: 96,96,255
+    h_boundary: 60,60,255
   brown:
     fraction: 0.1
-    l_boundary: 122,102,0
-    h_boundary: 255,170,60
+    l_boundary: 139,70,19
+    h_boundary: 160,82,43
+
+# choose line_color range
+# color boundary is in R,G,B format
+line_color:
+  black:
+    fraction: 0.3
+    l_boundary: 0,0,0
+    h_boundary: 64,64,64
+  gray:
+    fraction: 0.7
+    l_boundary: 77,77,77
+    h_boundary: 230,230,230
 
 # By default, text is drawed by Pillow with (https://stackoverflow.com/questions/43828955/measuring-width-of-text-python-pil)
 # If `random_space` is enabled, some text will be drawed char by char with a random space
@@ -30,10 +43,19 @@ random_space:
   min: -0.1 # -0.1 will make chars very close or even overlapped
   max: 0.1
 
+# draw extra random words on top or bottom of the img
+extra_words:
+  enable: true
+  fraction: 0.05
+  top:
+    fraction: 0.5
+  bottom:
+    fraction: 0.5
+
 # Do remap with sin()
 # Currently this process is very slow!
 curve:
-  enable: false
+  enable: true
   fraction: 0.3
   period: 360  # degree, sin 函数的周期
   min: 1 # sin 函数的幅值范围
@@ -120,15 +142,15 @@ line:
   fraction: 0.08
 
   under_line:
-    enable: false
+    enable: true
     fraction: 0.2
 
   table_line:
-    enable: false
+    enable: true
     fraction: 0.3
 
   middle_line:
-    enable: false
+    enable: true
     fraction: 0.5
 
 # These operates are applied on the final output image,

@@ -55,7 +55,7 @@ class Renderer(object):
             text_box_pnts = self.apply_crop(text_box_pnts, self.cfg.crop)
 
         if apply(self.cfg.line):
-            word_img, text_box_pnts = self.liner.apply(word_img, text_box_pnts, word_color)
+            word_img, text_box_pnts = self.liner.apply(word_img, text_box_pnts)
             self.dmsg("After draw line")
 
         if self.debug:
@@ -69,6 +69,9 @@ class Renderer(object):
             word_img = draw_box(word_img, text_box_pnts, (155, 255, 0))
 
         word_img = self.mix_seamless_bg(word_img, bg)
+        if apply(self.cfg.extra_words):
+            word_img = self.draw_extra_random_word(word_img, text_box_pnts, img_index)
+            self.dmsg("After add extra words")
 
         word_img, img_pnts_transformed, text_box_pnts_transformed = \
             self.apply_perspective_transform(word_img, text_box_pnts,
@@ -209,16 +212,18 @@ class Renderer(object):
     def get_word_color(self):
         colors = [i for i in self.cfg.font_color]
         p = [self.cfg.font_color[i].fraction for i in self.cfg.font_color]
+        # pick color by fraction
         color_name = np.random.choice(colors, p=p)
         l_boundary = [int(i) for i in self.cfg.font_color[color_name].l_boundary.split(',')]
         h_boundary = [int(i) for i in self.cfg.font_color[color_name].h_boundary.split(',')]
+        # random color by low and high RGB boundary
         if color_name == 'black' or color_name == 'gray':
             r = g = b = np.random.randint(l_boundary[0], h_boundary[0])
         else:
             r = np.random.randint(l_boundary[0], h_boundary[0])
             g = np.random.randint(l_boundary[1], h_boundary[1])
             b = np.random.randint(l_boundary[2], h_boundary[2])
-        return (r,g,b)
+        return (b, g, r)
 
     def draw_text_on_bg(self, word, font, bg):
         """
@@ -274,6 +279,24 @@ class Renderer(object):
         center = (bg.shape[1] // 2, bg.shape[0] // 2)
         mixed_clone = cv2.seamlessClone(text_img, bg, text_mask, center, cv2.MIXED_CLONE)
         return mixed_clone
+
+    def draw_extra_random_word(self, text_img, text_box_pnts, img_index):
+        pil_img = Image.fromarray(np.uint8(text_img))
+        draw = ImageDraw.Draw(pil_img)
+        word_color = self.get_word_color()
+        word, font, word_size = self.pick_font(img_index)
+        word_len = np.random.randint(1, len(word))
+        word_height = word_size[1]
+        word_width = word_size[0]
+        # calculate text x,y
+        text_x = np.random.randint(text_box_pnts[0][0], text_box_pnts[1][0])
+        text_y_b = text_box_pnts[2][1]
+        text_y_t = 2 * text_box_pnts[0][1] - text_box_pnts[2][1] - word_height * 0.5
+        text_y = np.random.choice([text_y_t, text_y_b],
+                                  p=[self.cfg.extra_words.top.fraction, self.cfg.extra_words.bottom.fraction])
+        self.draw_text_wrapper(draw, word[:word_len], text_x, text_y, font, word_color)
+        np_img = np.array(pil_img).astype(np.float32)
+        return np_img
 
     def draw_text_with_random_space(self, draw, font, word, word_color, bg_width, bg_height):
         """ If random_space applied, text_x, text_y, word_width, word_height may change"""
@@ -364,7 +387,6 @@ class Renderer(object):
     def gen_bg(self, width, height):
         bg = self.gen_bg_from_image(int(width), int(height))
         return bg
-
 
     def gen_bg_from_image(self, width, height):
         """
