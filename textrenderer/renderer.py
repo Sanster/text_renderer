@@ -55,7 +55,7 @@ class Renderer(object):
             text_box_pnts = self.apply_crop(text_box_pnts, self.cfg.crop)
 
         if apply(self.cfg.line):
-            word_img, text_box_pnts = self.liner.apply(word_img, text_box_pnts, word_color)
+            word_img, text_box_pnts = self.liner.apply(word_img, text_box_pnts)
             self.dmsg("After draw line")
 
         if self.debug:
@@ -67,6 +67,11 @@ class Renderer(object):
 
         if self.debug:
             word_img = draw_box(word_img, text_box_pnts, (155, 255, 0))
+
+        word_img = self.mix_seamless_bg(word_img, bg)
+        if apply(self.cfg.extra_words):
+            word_img = self.draw_extra_random_word(word_img, text_box_pnts, img_index)
+            self.dmsg("After add extra words")
 
         word_img, img_pnts_transformed, text_box_pnts_transformed = \
             self.apply_perspective_transform(word_img, text_box_pnts,
@@ -204,21 +209,21 @@ class Renderer(object):
     def int_around(self, val):
         return int(np.around(val))
 
-    def get_word_color(self, bg, text_x, text_y, word_height, word_width):
-        """
-        Only use word roi area to get word color
-        """
-        offset = 10
-        ymin = text_y - offset
-        ymax = text_y + word_height + offset
-        xmin = text_x - offset
-        xmax = text_x + word_width + offset
-
-        word_roi_bg = bg[ymin: ymax, xmin: xmax]
-
-        bg_mean = int(np.mean(word_roi_bg) * (2 / 3))
-        word_color = random.randint(0, bg_mean)
-        return word_color
+    def get_word_color(self):
+        colors = [i for i in self.cfg.font_color]
+        p = [self.cfg.font_color[i].fraction for i in self.cfg.font_color]
+        # pick color by fraction
+        color_name = np.random.choice(colors, p=p)
+        l_boundary = [int(i) for i in self.cfg.font_color[color_name].l_boundary.split(',')]
+        h_boundary = [int(i) for i in self.cfg.font_color[color_name].h_boundary.split(',')]
+        # random color by low and high RGB boundary
+        if color_name == 'black' or color_name == 'gray':
+            r = g = b = np.random.randint(l_boundary[0], h_boundary[0])
+        else:
+            r = np.random.randint(l_boundary[0], h_boundary[0])
+            g = np.random.randint(l_boundary[1], h_boundary[1])
+            b = np.random.randint(l_boundary[2], h_boundary[2])
+        return (b, g, r)
 
     def draw_text_on_bg(self, word, font, bg):
         """
@@ -238,28 +243,26 @@ class Renderer(object):
         word_width = word_size[0]
 
         offset = font.getoffset(word)
+        pure_bg = np.ones((bg_height, bg_width, 3)) * 255
 
-        pil_img = Image.fromarray(np.uint8(bg))
+        pil_img = Image.fromarray(np.uint8(pure_bg))
         draw = ImageDraw.Draw(pil_img)
 
         # Draw text in the center of bg
         text_x = int((bg_width - word_width) / 2)
         text_y = int((bg_height - word_height) / 2)
 
-        word_color = self.get_word_color(bg, text_x, text_y, word_height, word_width)
+        word_color = self.get_word_color()
 
         if apply(self.cfg.random_space):
             text_x, text_y, word_width, word_height = self.draw_text_with_random_space(draw, font, word, word_color,
                                                                                        bg_width, bg_height)
             np_img = np.array(pil_img).astype(np.float32)
         else:
-            if apply(self.cfg.seamless_clone):
-                np_img = self.draw_text_seamless(font, bg, word, word_color, word_height, word_width, offset)
-            else:
-                self.draw_text_wrapper(draw, word, text_x - offset[0], text_y - offset[1], font, word_color)
-                # draw.text((text_x - offset[0], text_y - offset[1]), word, fill=word_color, font=font)
+            self.draw_text_wrapper(draw, word, text_x - offset[0], text_y - offset[1], font, word_color)
+            # draw.text((text_x - offset[0], text_y - offset[1]), word, fill=word_color, font=font)
 
-                np_img = np.array(pil_img).astype(np.float32)
+            np_img = np.array(pil_img).astype(np.float32)
 
         text_box_pnts = [
             [text_x, text_y],
@@ -270,46 +273,29 @@ class Renderer(object):
 
         return np_img, text_box_pnts, word_color
 
-    def draw_text_seamless(self, font, bg, word, word_color, word_height, word_width, offset):
-        # For better seamlessClone
-        seamless_offset = 6
-
-        # Draw text on a white image, than draw it on background
-        white_bg = np.ones((word_height + seamless_offset, word_width + seamless_offset)) * 255
-        text_img = Image.fromarray(np.uint8(white_bg))
-        draw = ImageDraw.Draw(text_img)
-
-        # draw.text((0 + seamless_offset // 2, 0 - offset[1] + seamless_offset // 2), word,
-        #           fill=word_color, font=font)
-
-        self.draw_text_wrapper(draw, word,
-                               0 + seamless_offset // 2,
-                               0 - offset[1] + seamless_offset // 2,
-                               font, word_color)
-
-        # assume whole text_img as mask
+    def mix_seamless_bg(self, text_img, bg):
         text_img = np.array(text_img).astype(np.uint8)
         text_mask = 255 * np.ones(text_img.shape, text_img.dtype)
-
-        # This is where the CENTER of the airplane will be placed
         center = (bg.shape[1] // 2, bg.shape[0] // 2)
+        mixed_clone = cv2.seamlessClone(text_img, bg, text_mask, center, cv2.MIXED_CLONE)
+        return mixed_clone
 
-        # opencv seamlessClone require bgr image
-        text_img_bgr = np.ones((text_img.shape[0], text_img.shape[1], 3), np.uint8)
-        bg_bgr = np.ones((bg.shape[0], bg.shape[1], 3), np.uint8)
-        cv2.cvtColor(text_img, cv2.COLOR_GRAY2BGR, text_img_bgr)
-        cv2.cvtColor(bg, cv2.COLOR_GRAY2BGR, bg_bgr)
-
-        flag = np.random.choice([
-            cv2.NORMAL_CLONE,
-            cv2.MIXED_CLONE,
-            cv2.MONOCHROME_TRANSFER
-        ])
-
-        mixed_clone = cv2.seamlessClone(text_img_bgr, bg_bgr, text_mask, center, flag)
-
-        np_img = cv2.cvtColor(mixed_clone, cv2.COLOR_BGR2GRAY)
-
+    def draw_extra_random_word(self, text_img, text_box_pnts, img_index):
+        pil_img = Image.fromarray(np.uint8(text_img))
+        draw = ImageDraw.Draw(pil_img)
+        word_color = self.get_word_color()
+        word, font, word_size = self.pick_font(img_index)
+        word_len = np.random.randint(1, len(word))
+        word_height = word_size[1]
+        word_width = word_size[0]
+        # calculate text x,y
+        text_x = np.random.randint(text_box_pnts[0][0], text_box_pnts[1][0])
+        text_y_b = text_box_pnts[2][1]
+        text_y_t = 2 * text_box_pnts[0][1] - text_box_pnts[2][1] - word_height * 0.5
+        text_y = np.random.choice([text_y_t, text_y_b],
+                                  p=[self.cfg.extra_words.top.fraction, self.cfg.extra_words.bottom.fraction])
+        self.draw_text_wrapper(draw, word[:word_len], text_x, text_y, font, word_color)
+        np_img = np.array(pil_img).astype(np.float32)
         return np_img
 
     def draw_text_with_random_space(self, draw, font, word, word_color, bg_width, bg_height):
@@ -399,23 +385,7 @@ class Renderer(object):
         draw.text((x, y), text, font=font, fill=text_color)
 
     def gen_bg(self, width, height):
-        if apply(self.cfg.img_bg):
-            bg = self.gen_bg_from_image(int(width), int(height))
-        else:
-            bg = self.gen_rand_bg(int(width), int(height))
-        return bg
-
-    def gen_rand_bg(self, width, height):
-        """
-        Generate random background
-        """
-        bg_high = random.uniform(220, 255)
-        bg_low = bg_high - random.uniform(1, 60)
-
-        bg = np.random.randint(bg_low, bg_high, (height, width)).astype(np.uint8)
-
-        bg = self.apply_gauss_blur(bg)
-
+        bg = self.gen_bg_from_image(int(width), int(height))
         return bg
 
     def gen_bg_from_image(self, width, height):
@@ -428,15 +398,17 @@ class Renderer(object):
 
         scale = max(width / bg.shape[1], height / bg.shape[0])
 
+        rand_scale = scale * random.random()
+
+        scale = scale if width > rand_scale * bg.shape[1] else rand_scale
+
         out = cv2.resize(bg, None, fx=scale, fy=scale)
 
         x_offset, y_offset = self.random_xy_offset(height, width, out.shape[0], out.shape[1])
 
         out = out[y_offset:y_offset + height, x_offset:x_offset + width]
 
-        out = self.apply_gauss_blur(out, ks=[7, 11, 13, 15, 17])
-
-        bg_mean = int(np.mean(out))
+        # out = self.apply_gauss_blur(out, ks=[7, 11, 13, 15, 17]) 尝试不再模糊背景
 
         # TODO: find a better way to deal with background
         # alpha = 255 / bg_mean  # 对比度
