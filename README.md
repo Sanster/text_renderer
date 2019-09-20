@@ -1,5 +1,3 @@
-# Fork from :
-https://github.com/Sanster/text_renderer
 # Modified
 Support color bg
 Support color char
