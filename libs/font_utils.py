@@ -67,11 +67,16 @@ def check_font_chars(ttf, charset):
     :param charset: chars
     :return: unsupported_chars, supported_chars
     """
-    chars = chain.from_iterable([y + (Unicode[y[0]],) for y in x.cmap.items()] for x in ttf["cmap"].tables)
+    #chars = chain.from_iterable([y + (Unicode[y[0]],) for y in x.cmap.items()] for x in ttf["cmap"].tables)
+    chars_int=set()
+    for table in ttf['cmap'].tables:
+        for k,v in table.cmap.items():
+            chars_int.add(k)    
+#     chars = chain.from_iterable([y + (Unicode[y[0]],) for y in x.cmap.items()] for x in ttf["cmap"].tables)
 
-    chars_int = []
-    for c in chars:
-        chars_int.append(c[0])
+#     chars_int = []
+#     for c in chars:
+#         chars_int.append(c[0])
 
     unsupported_chars = []
     supported_chars = []
@@ -90,7 +95,9 @@ def get_fonts_chars(fonts, chars_file):
     loads/saves font supported chars from cache file
     :param fonts: list of font path. e.g ['./data/fonts/msyh.ttc']
     :param chars_file: arg from parse_args
-    :return: dict, key -> font_path, value -> font supported chars
+    :return: dict
+        key -> font_path
+        value -> font supported chars
     """
     out = {}
 
