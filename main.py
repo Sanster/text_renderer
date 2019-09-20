@@ -73,6 +73,7 @@ def gen_img_retry(renderer, img_index):
         return renderer.gen_img(img_index)
     except Exception as e:
         print("Retry gen_img: %s" % str(e))
+        traceback.print_exc()
         raise Exception
 
 
@@ -98,7 +99,7 @@ def generate_img(img_index, q=None):
                       end=print_end)
     else:
         utils.viz_img(im)
-    # print("-------------{}------------------".format(fname))
+    
 
 def sort_labels(tmp_label_fname, label_fname):
     lines = []
