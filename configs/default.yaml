@@ -1,37 +1,26 @@
 # Small font_size will make text looks like blured/prydown
 font_size:
-  min: 14
-  max: 23
+  min: 26
+  max: 30
 
+random_size: true
 # By default, text is drawed by Pillow with (https://stackoverflow.com/questions/43828955/measuring-width-of-text-python-pil)
 # If `random_space` is enabled, some text will be drawed char by char with a random space
 random_space:
   enable: false
-  fraction: 0.3
+  fraction: 0.2
   min: -0.1 # -0.1 will make chars very close or even overlapped
   max: 0.1
 
 # Do remap with sin()
 # Currently this process is very slow!
 curve:
-  enable: false
+  enable: true
   fraction: 0.3
-  period: 360  # degree, sin 函数的周期
-  min: 1 # sin 函数的幅值范围
+  period: 360  # degree, sin funct period
+  min: 1 # sin max min range
   max: 5
 
-# random crop text height
-crop:
-  enable: false
-  fraction: 0.5
-
-  # top and bottom will applied equally
-  top:
-    min: 5
-    max: 10 # in pixel, this value should small than img_height
-  bottom:
-    min: 5
-    max: 10 # in pixel, this value should small than img_height
 
 # Use image in bg_dir as background for text
 img_bg:
@@ -40,7 +29,7 @@ img_bg:
 
 # Not work when random_space applied
 text_border:
-  enable: false
+  enable: true
   fraction: 0.5
 
   # lighter than word color
@@ -56,7 +45,7 @@ text_border:
 # https://docs.opencv.org/3.4/df/da0/group__photo__clone.html#ga2bf426e4c93a6b1f21705513dfeca49d
 # https://www.cs.virginia.edu/~connelly/class/2014/comp_photo/proj2/poisson.pdf
 # Use opencv seamlessClone() to draw text on background
-# For some background image, this will make text image looks more real
+# This will make text image looks more natural
 seamless_clone:
   enable: false
   fraction: 0.5
@@ -97,19 +86,19 @@ noise:
     fraction: 0.25
 
 line:
-  enable: false
+  enable: true
   fraction: 0.05
 
   under_line:
-    enable: false
+    enable: true
     fraction: 0.2
 
   table_line:
-    enable: false
+    enable: true
     fraction: 0.3
 
   middle_line:
-    enable: false
+    enable: true
     fraction: 0.5
 
 # These operates are applied on the final output image,
@@ -122,10 +111,10 @@ reverse_color:
   fraction: 0.5
 
 emboss:
-  enable: false
+  enable: true
   fraction: 0.1
 
 sharp:
-  enable: false
+  enable: true
   fraction: 0.1
 

@@ -76,7 +76,7 @@ def draw_bbox(img, bbox, color):
     return draw_box(img, pnts, color)
 
 
-def load_bgs(bg_dir):
+def load_bgs(bg_dir,channel):
     dst = []
 
     for root, sub_folder, file_list in os.walk(bg_dir):
@@ -84,7 +84,13 @@ def load_bgs(bg_dir):
             image_path = os.path.join(root, file_name)
 
             # For load non-ascii image_path on Windows
-            bg = cv2.imdecode(np.fromfile(image_path, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
+            if channel == 1:
+                bg = cv2.imdecode(np.fromfile(image_path, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
+            # For color bg img
+            elif channel == 3:
+                bg = cv2.imdecode(np.fromfile(image_path, dtype=np.uint8), cv2.IMREAD_COLOR)
+            else:
+                print("please confirm the channel num:{}".format(channel))
 
             dst.append(bg)
 

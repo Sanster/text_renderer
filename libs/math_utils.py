@@ -66,12 +66,12 @@ def warpPerspective(src, M33, sl, gpu):
 # https://nbviewer.jupyter.org/github/manisoftwartist/perspectiveproj/blob/master/perspective.ipynb
 # http://planning.cs.uiuc.edu/node102.html
 class PerspectiveTransform(object):
-    def __init__(self, x, y, z, scale, fovy):
+    def __init__(self, x, y, z, scale, degree):
         self.x = x
         self.y = y
         self.z = z
         self.scale = scale
-        self.fovy = fovy
+        self.degree = degree
 
     def transform_image(self, src, gpu=False):
         if len(src.shape) > 2:
@@ -79,7 +79,7 @@ class PerspectiveTransform(object):
         else:
             H, W = src.shape
 
-        M33, sl, _, ptsOut = self.get_warp_matrix(W, H, self.x, self.y, self.z, self.scale, self.fovy)
+        M33, sl, _, ptsOut = self.get_warp_matrix(W, H, self.x, self.y, self.z, self.scale, self.degree)
         sl = int(sl)
 
         dst = warpPerspective(src, M33, sl, gpu)

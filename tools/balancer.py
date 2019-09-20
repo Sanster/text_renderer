@@ -149,11 +149,11 @@ class BalanceCorpus(ChnCorpus):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--chars_file', type=str, default='./data/chars/chn.txt')
-    parser.add_argument('--corpus_dir', type=str, default='/home/cwq/data/ocr/corpus/chn')
-    parser.add_argument('--output_file', type=str, default='./output2/labels.txt')
+    parser.add_argument('--chars_file', type=str, default='../data/chars/chn.txt')
+    parser.add_argument('--corpus_dir', type=str, default='../data/corpus/')
+    parser.add_argument('--output_file', type=str, default='../output/labels.txt')
     parser.add_argument('--length', type=int, default=10)
-    parser.add_argument('--num_img', type=int, default=100000)
+    parser.add_argument('--num_img', type=int, default=10000)
 
     args = parser.parse_args()
 

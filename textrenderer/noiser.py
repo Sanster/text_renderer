@@ -3,7 +3,10 @@ import cv2
 
 
 # https://stackoverflow.com/questions/22937589/how-to-add-noise-gaussian-salt-and-pepper-etc-to-image-in-python-with-opencv
-class Noiser(object):
+class NoiseAdd(object):
+    """
+    add noise
+    """
     def __init__(self, cfg):
         self.cfg = cfg
 
@@ -37,36 +40,47 @@ class Noiser(object):
 
         return noise_func(img)
 
-    def apply_gauss_noise(self, img):
+    @staticmethod
+    def apply_gauss_noise(img):
         """
         Gaussian-distributed additive noise.
         """
-        row, col = img.shape
-
+        shape = img.shape
+        row, col = shape[:2]
         mean = 0
         stddev = np.sqrt(15)
-        gauss_noise = np.zeros((row, col))
+        if len(shape) == 2:
+            gauss_noise = np.zeros((row, col))
+        else:
+            gauss_noise = np.zeros((row, col,shape[2]))
         cv2.randn(gauss_noise, mean, stddev)
         out = img + gauss_noise
 
         return out
 
-    def apply_uniform_noise(self, img):
+    @staticmethod
+    def apply_uniform_noise(img):
         """
         Apply zero-mean uniform noise
         """
-        row, col = img.shape
+        shape = img.shape
+        row, col = shape[:2]
         alpha = 0.05
-        gauss = np.random.uniform(0 - alpha, alpha, (row, col))
-        gauss = gauss.reshape(row, col)
+        if len(shape) == 2:
+            gauss = np.random.uniform(0 - alpha, alpha, (row, col))
+            gauss = gauss.reshape(row, col)
+        else:
+            gauss = np.random.uniform(0 - alpha, alpha, (row, col, shape[2]))
+            gauss = gauss.reshape(row, col, shape[2])
         out = img + img * gauss
         return out
 
-    def apply_sp_noise(self, img):
+    @staticmethod
+    def apply_sp_noise(img):
         """
         Salt and pepper noise. Replaces random pixels with 0 or 255.
         """
-        row, col = img.shape
+
         s_vs_p = 0.5
         amount = np.random.uniform(0.004, 0.01)
         out = np.copy(img)
@@ -74,16 +88,18 @@ class Noiser(object):
         num_salt = np.ceil(amount * img.size * s_vs_p)
         coords = [np.random.randint(0, i - 1, int(num_salt))
                   for i in img.shape]
-        out[coords] = 255.
+        out[tuple(coords)] = 255.
 
         # Pepper mode
         num_pepper = np.ceil(amount * img.size * (1. - s_vs_p))
         coords = [np.random.randint(0, i - 1, int(num_pepper))
                   for i in img.shape]
-        out[coords] = 0
+        out[tuple(coords)] = 0
+        # print("apply sp noise")
         return out
 
-    def apply_poisson_noise(self, img):
+    @staticmethod
+    def apply_poisson_noise(img):
         """
         Poisson-distributed noise generated from the data.
         """

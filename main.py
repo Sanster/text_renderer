@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/env/bin python3
 
 """
@@ -24,22 +25,27 @@ from tenacity import retry
 lock = mp.Lock()
 counter = mp.Value('i', 0)
 STOP_TOKEN = 'kill'
-
 flags = parse_args()
 cfg = load_config(flags.config_file)
 
 fonts = font_utils.get_font_paths_from_list(flags.fonts_list)
-bgs = utils.load_bgs(flags.bg_dir)
+
+# bgs = utils.load_bgs(flags.bg_dir)
+bgs = utils.load_bgs(flags.bg_dir,flags.channel)
 
 corpus = corpus_factory(flags.corpus_mode, flags.chars_file, flags.corpus_dir, flags.length)
 
+# class init
 renderer = Renderer(corpus, fonts, bgs, cfg,
                     height=flags.img_height,
                     width=flags.img_width,
                     clip_max_chars=flags.clip_max_chars,
                     debug=flags.debug,
                     gpu=flags.gpu,
-                    strict=flags.strict)
+                    strict=flags.strict,
+                    channel=flags.channel,
+                    select=flags.select,
+                    select_chars=flags.select_chars)
 
 
 def start_listen(q, fname):
@@ -67,7 +73,6 @@ def gen_img_retry(renderer, img_index):
         return renderer.gen_img(img_index)
     except Exception as e:
         print("Retry gen_img: %s" % str(e))
-        traceback.print_exc()
         raise Exception
 
 
@@ -75,20 +80,14 @@ def generate_img(img_index, q=None):
     global flags, lock, counter
     # Make sure different process has different random seed
     np.random.seed()
-
-    im, word = gen_img_retry(renderer, img_index)
-
+    im, word  = gen_img_retry(renderer, img_index)
     base_name = '{:08d}'.format(img_index)
-
     if not flags.viz:
         fname = os.path.join(flags.save_dir, base_name + '.jpg')
         cv2.imwrite(fname, im)
-
         label = "{} {}".format(base_name, word)
-
         if q is not None:
             q.put(label)
-
         with lock:
             counter.value += 1
             print_end = '\n' if counter.value == flags.num_img else '\r'
@@ -99,17 +98,16 @@ def generate_img(img_index, q=None):
                       end=print_end)
     else:
         utils.viz_img(im)
-
+    # print("-------------{}------------------".format(fname))
 
 def sort_labels(tmp_label_fname, label_fname):
     lines = []
     with open(tmp_label_fname, mode='r', encoding='utf-8') as f:
         lines = f.readlines()
-
     lines = sorted(lines)
     with open(label_fname, mode='w', encoding='utf-8') as f:
         for line in lines:
-            f.write(line[9:])
+            f.write(line[9:])  # :9 filename
 
 
 def restore_exist_labels(label_path):

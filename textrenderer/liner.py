@@ -55,7 +55,10 @@ class Liner(object):
         text_box_pnts[2][1] += y_offset
         text_box_pnts[3][1] += y_offset
 
-        line_color = word_color + random.randint(0, 10)
+        if len(word_img.shape) == 2:
+            line_color = word_color[0]
+        else:
+            line_color = tuple([x + random.randint(0, 10) for x in word_color])
 
         dst = cv2.line(word_img,
                        (text_box_pnts[2][0], text_box_pnts[2][1]),
@@ -75,7 +78,11 @@ class Liner(object):
         dst = word_img
         option = random.choice(self.linestate.tableline_options)
         thickness = random.choice(self.linestate.tableline_thickness)
-        line_color = word_color + random.randint(0, 10)
+        #line_color = word_color + random.randint(0, 10)
+        if len(word_img.shape) == 2:
+            line_color = word_color[0]
+        else:
+            line_color = tuple([x + random.randint(0, 10) for x in word_color])
 
         top_y_offset = random.choice(self.linestate.tableline_y_offsets)
         bottom_y_offset = random.choice(self.linestate.tableline_y_offsets)

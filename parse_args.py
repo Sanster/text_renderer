@@ -8,7 +8,7 @@ def parse_args():
 
     parser.add_argument('--num_img', type=int, default=20, help="Number of images to generate")
 
-    parser.add_argument('--length', type=int, default=10,
+    parser.add_argument('--length', type=int, default=15,
                         help='Chars(chn) or words(eng) in a image. For eng corpus mode, default length is 3')
 
     parser.add_argument('--clip_max_chars', action='store_true', default=False,
@@ -16,11 +16,17 @@ def parse_args():
                              'should less then the width of last CNN layer.')
 
     parser.add_argument('--img_height', type=int, default=32)
-    parser.add_argument('--img_width', type=int, default=256,
+    parser.add_argument('--img_width', type=int, default=460,
                         help="If 0, output images will have different width")
 
     parser.add_argument('--chars_file', type=str, default='./data/chars/chn.txt',
                         help='Chars allowed to be appear in generated images.')
+
+    parser.add_argument('--select', action='store_true', default=True,
+                        help='Chars select mode.')
+
+    parser.add_argument('--select_chars', type=str, default='./data/chars/select.txt',
+                        help='Chars select list.')
 
     parser.add_argument('--config_file', type=str, default='./configs/default.yaml',
                         help='Set the parameters when rendering images')
@@ -48,6 +54,7 @@ def parse_args():
 
     parser.add_argument('--debug', action='store_true', default=False, help="output uncroped image")
 
+
     parser.add_argument('--viz', action='store_true', default=False)
 
     parser.add_argument('--strict', action='store_true', default=False,
@@ -55,8 +62,10 @@ def parse_args():
 
     parser.add_argument('--gpu', action='store_true', default=False, help="use CUDA to generate image")
 
-    parser.add_argument('--num_processes', type=int, default=None,
+    parser.add_argument('--num_processes', type=int, default=2,
                         help="Number of processes to generate image. If None, use all cpu cores")
+    parser.add_argument('--channel', type=int, default=3,
+                        help="1 or 3 for gray or rgb")
 
     flags, _ = parser.parse_known_args()
     flags.save_dir = os.path.join(flags.output_dir, flags.tag)

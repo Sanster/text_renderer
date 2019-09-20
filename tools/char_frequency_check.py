@@ -94,8 +94,10 @@ def process_file(label_file: str, log=False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='输入 labels.txt 标签数据，输出标签中每个字符的频率图')
-    parser.add_argument('--label', type=str, default='')
-    parser.add_argument('--log', action='store_true', default=False)
+    parser.add_argument('--label', type=str, default='../../text_renderer/output/default/')
+    # parser.add_argument('--label', type=str, default='../../text_renderer/data/corpus')
+    parser.add_argument('--log', action='store_true', default=True)
+
     flags, _ = parser.parse_known_args()
 
     if os.path.isdir(flags.label):
