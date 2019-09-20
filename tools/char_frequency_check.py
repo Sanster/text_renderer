@@ -67,7 +67,8 @@ def process_dir(label_dir, log=False):
 
     for p in label_paths:
         name = p.split('/')[-1].split('.')[0]
-        chars_count_list, total_chars_count = analyze_labels(p)
+        chars_count_dict, total_chars_count = analyze_labels(p)
+        chars_count_list = list(sorted(chars_count_dict.items(), key=lambda x: x[1], reverse=True))
         print_info(chars_count_list, total_chars_count, name)
 
         y = list(map(lambda x: x[1], chars_count_list))
