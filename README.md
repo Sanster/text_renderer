@@ -1,8 +1,8 @@
 # Modified
-Support color bg.
-Support color char.
-Support random image length.
-Support select chars.
+- Support color bg.
+- Support color char.
+- Support random image length.
+- Support select chars.
 
 # Text Renderer
 Generate text images for training deep learning OCR model (e.g. [CRNN](https://github.com/bgshih/crnn)).
