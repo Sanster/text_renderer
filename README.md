@@ -3,6 +3,7 @@
 - Support color char.
 - Support random image length.
 - Support select chars.
+- Support cache corpus.
 
 # Text Renderer
 Generate text images for training deep learning OCR model (e.g. [CRNN](https://github.com/bgshih/crnn)).
