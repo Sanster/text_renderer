@@ -69,7 +69,7 @@ class ChnCorpus(Corpus):
         # random select a corpus
         idx = random.randint(0, len(self.remap)-1)
         # random choice a special word position
-        if special_word not in self.remap[idx].keys():
+        if special_word in self.remap[idx].keys():
             catch = random.choice(self.remap[idx][special_word])
         else:
             remap_list_id = list(range(len(self.remap)))  # must use list,py3 default is range type,py2 is list
