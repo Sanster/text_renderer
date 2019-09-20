@@ -61,7 +61,7 @@ def start_listen(q, fname):
     f.close()
 
 
-@retry
+# @retry
 def gen_img_retry(renderer, img_index):
     try:
         return renderer.gen_img(img_index)

@@ -21,7 +21,23 @@ class Liner(object):
         self.linestate = LineState()
         self.cfg = cfg
 
-    def apply(self, word_img, text_box_pnts, word_color):
+    def get_line_color(self):
+        colors = [i for i in self.cfg.line_color]
+        p = [self.cfg.line_color[i].fraction for i in self.cfg.line_color]
+        # pick color by fraction
+        color_name = np.random.choice(colors, p=p)
+        l_boundary = [int(i) for i in self.cfg.line_color[color_name].l_boundary.split(',')]
+        h_boundary = [int(i) for i in self.cfg.line_color[color_name].h_boundary.split(',')]
+        # random color by low and high RGB boundary
+        if color_name == 'black' or color_name == 'gray':
+            r = g = b = np.random.randint(l_boundary[0], h_boundary[0])
+        else:
+            r = np.random.randint(l_boundary[0], h_boundary[0])
+            g = np.random.randint(l_boundary[1], h_boundary[1])
+            b = np.random.randint(l_boundary[2], h_boundary[2])
+        return (b, g, r)
+
+    def apply(self, word_img, text_box_pnts):
         """
         :param word_img:  word image with big background
         :param text_box_pnts: left-top, right-top, right-bottom, left-bottom of text word
@@ -46,16 +62,14 @@ class Liner(object):
             return word_img, text_box_pnts
 
         line_effect_func = np.random.choice(funcs, p=line_p)
+        line_color = self.get_line_color()
+        return line_effect_func(word_img, text_box_pnts, line_color)
 
-        return line_effect_func(word_img, text_box_pnts, word_color)
-
-    def apply_under_line(self, word_img, text_box_pnts, word_color):
+    def apply_under_line(self, word_img, text_box_pnts, line_color):
         y_offset = random.choice([0, 1])
 
         text_box_pnts[2][1] += y_offset
         text_box_pnts[3][1] += y_offset
-
-        line_color = word_color + random.randint(0, 10)
 
         dst = cv2.line(word_img,
                        (text_box_pnts[2][0], text_box_pnts[2][1]),
@@ -66,7 +80,7 @@ class Liner(object):
 
         return dst, text_box_pnts
 
-    def apply_table_line(self, word_img, text_box_pnts, word_color):
+    def apply_table_line(self, word_img, text_box_pnts, line_color):
         """
         共有 8 种可能的画法，横线横穿整张 word_img
         0/1/2/3: 仅单边（左上右下）
@@ -75,8 +89,6 @@ class Liner(object):
         dst = word_img
         option = random.choice(self.linestate.tableline_options)
         thickness = random.choice(self.linestate.tableline_thickness)
-        line_color = word_color + random.randint(0, 10)
-
         top_y_offset = random.choice(self.linestate.tableline_y_offsets)
         bottom_y_offset = random.choice(self.linestate.tableline_y_offsets)
         left_x_offset = random.choice(self.linestate.tableline_x_offsets)
@@ -144,16 +156,15 @@ class Liner(object):
 
         return dst, text_box_pnts
 
-    def apply_middle_line(self, word_img, text_box_pnts, word_color):
+    def apply_middle_line(self, word_img, text_box_pnts, line_color):
         y_center = int((text_box_pnts[0][1] + text_box_pnts[3][1]) / 2)
 
-        img_mean = int(np.mean(word_img))
         thickness = np.random.choice(self.linestate.middleline_thickness, p=self.linestate.middleline_thickness_p)
 
         dst = cv2.line(word_img,
                        (text_box_pnts[0][0], y_center),
                        (text_box_pnts[1][0], y_center),
-                       color=img_mean,
+                       color=line_color,
                        thickness=thickness,
                        lineType=cv2.LINE_AA)
 
