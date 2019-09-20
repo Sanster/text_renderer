@@ -123,6 +123,23 @@ def get_fonts_chars(fonts, chars_file):
 
     return out
 
+def get_unsupported_chars(fonts, chars_file):
+    """
+    Get fonts unsupported chars by loads/saves font supported chars from cache file
+    :param fonts:
+    :param chars_file:
+    :return: dict
+        key -> font_path
+        value -> font unsupported chars
+    """
+    charset = load_chars(chars_file)
+    charset = ''.join(charset)
+    fonts_chars = get_fonts_chars(fonts, chars_file)
+    fonts_unsupported_chars = {}
+    for font_path, chars in fonts_chars.items():
+        unsupported_chars = list(filter(lambda x: x not in chars, charset))
+        fonts_unsupported_chars[font_path] = unsupported_chars
+    return fonts_unsupported_chars
 
 def get_select_chars(path):
     with open(path, 'r', encoding="utf-8") as f:
