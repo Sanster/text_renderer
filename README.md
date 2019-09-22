@@ -44,6 +44,8 @@ new config file and use it by `--config_file` option), here are some examples:
 |Emboss|![emboss](./imgs/effects/emboss.jpg)|
 |Reverse color|![reverse color](./imgs/effects/reverse.jpg)|
 |Blur|![blur](./imgs/effects/blur.jpg)|
+|Text color|![font_color](./imgs/effects/colored.jpg)|
+|Line color|![line_color](./imgs/effects/table.jpg)|
 
 3. Run `main.py` file.
 

@@ -6,7 +6,7 @@ font_size:
 # choose Text color range
 # color boundary is in R,G,B format
 font_color:
-  enable: false
+  enable: true
   blue:
     fraction: 0.5
     l_boundary: [0,0,150]
@@ -19,7 +19,7 @@ font_color:
 # By default, text is drawed by Pillow with (https://stackoverflow.com/questions/43828955/measuring-width-of-text-python-pil)
 # If `random_space` is enabled, some text will be drawed char by char with a random space
 random_space:
-  enable: false
+  enable: true
   fraction: 0.3
   min: -0.1 # -0.1 will make chars very close or even overlapped
   max: 0.1
@@ -27,15 +27,15 @@ random_space:
 # Do remap with sin()
 # Currently this process is very slow!
 curve:
-  enable: false
-  fraction: 0.3
+  enable: true
+  fraction: 0.5
   period: 360  # degree, sin 函数的周期
   min: 1 # sin 函数的幅值范围
   max: 5
 
 # random crop text height
 crop:
-  enable: false
+  enable: true
   fraction: 0.5
 
   # top and bottom will applied equally
@@ -53,7 +53,7 @@ img_bg:
 
 # Not work when random_space applied
 text_border:
-  enable: false
+  enable: true
   fraction: 0.5
 
   # lighter than word color
@@ -71,7 +71,7 @@ text_border:
 # Use opencv seamlessClone() to draw text on background
 # For some background image, this will make text image looks more real
 seamless_clone:
-  enable: false
+  enable: true
   fraction: 0.5
 
 perspective_transform:
@@ -110,27 +110,27 @@ noise:
     fraction: 0.25
 
 line:
-  enable: false
-  fraction: 0.05
+  enable: true
+  fraction: 0.5
 
   under_line:
-    enable: false
+    enable: true
     fraction: 0.2
 
   table_line:
-    enable: false
+    enable: true
     fraction: 0.3
 
   middle_line:
-    enable: false
+    enable: true
     fraction: 0.5
 
 line_color:
-  enable: false
+  enable: true
   black:
     fraction: 0.5
-    l_boundary: 0,0,0
-    h_boundary: 64,64,64
+    l_boundary: [0,0,0]
+    h_boundary: [64,64,64]
   blue:
     fraction: 0.5
     l_boundary: [0,0,150]
@@ -142,14 +142,14 @@ line_color:
 # By default, text is darker than background.
 # If `reverse_color` is enabled, some images will have dark background and light text
 reverse_color:
-  enable: false
+  enable: true
   fraction: 0.5
 
 emboss:
-  enable: false
+  enable: true
   fraction: 0.1
 
 sharp:
-  enable: false
+  enable: true
   fraction: 0.1
 

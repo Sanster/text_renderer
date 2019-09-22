@@ -38,6 +38,10 @@ class Renderer(object):
 
         self.create_kernals()
 
+        if not self.is_bgr():
+            for i, bg in enumerate(self.bgs):
+                self.bgs[i] = cv2.cvtColor(bg, cv2.COLOR_BGR2GRAY)
+
         if self.strict:
             self.font_unsupport_chars = font_utils.get_unsupported_chars(self.fonts, corpus.chars_file)
 
@@ -204,7 +208,7 @@ class Renderer(object):
     def int_around(self, val):
         return int(np.around(val))
 
-    def get_word_color(self, bg, text_x, text_y, word_height, word_width):
+    def get_gray_word_color(self, bg, text_x, text_y, word_height, word_width):
         """
         Only use word roi area to get word color
         """
@@ -219,6 +223,25 @@ class Renderer(object):
         bg_mean = int(np.mean(word_roi_bg) * (2 / 3))
         word_color = random.randint(0, bg_mean)
         return word_color
+
+    def get_word_color(self):
+        p = []
+        colors = []
+        for k, v in self.cfg.font_color.items():
+            if k == 'enable':
+                continue
+            p.append(v.fraction)
+            colors.append(k)
+
+        # pick color by fraction
+        color_name = np.random.choice(colors, p=p)
+        l_boundary = self.cfg.font_color[color_name].l_boundary
+        h_boundary = self.cfg.font_color[color_name].h_boundary
+        # random color by low and high RGB boundary
+        r = np.random.randint(l_boundary[0], h_boundary[0])
+        g = np.random.randint(l_boundary[1], h_boundary[1])
+        b = np.random.randint(l_boundary[2], h_boundary[2])
+        return b, g, r
 
     def draw_text_on_bg(self, word, font, bg):
         """
@@ -246,7 +269,10 @@ class Renderer(object):
         text_x = int((bg_width - word_width) / 2)
         text_y = int((bg_height - word_height) / 2)
 
-        word_color = self.get_word_color(bg, text_x, text_y, word_height, word_width)
+        if self.is_bgr():
+            word_color = self.get_word_color()
+        else:
+            word_color = self.get_gray_word_color(bg, text_x, text_y, word_height, word_width)
 
         if apply(self.cfg.random_space):
             text_x, text_y, word_width, word_height = self.draw_text_with_random_space(draw, font, word, word_color,
@@ -275,7 +301,11 @@ class Renderer(object):
         seamless_offset = 6
 
         # Draw text on a white image, than draw it on background
-        white_bg = np.ones((word_height + seamless_offset, word_width + seamless_offset)) * 255
+        if self.is_bgr():
+            white_bg = np.ones((word_height + seamless_offset, word_width + seamless_offset, 3)) * 255
+        else:
+            white_bg = np.ones((word_height + seamless_offset, word_width + seamless_offset)) * 255
+
         text_img = Image.fromarray(np.uint8(white_bg))
         draw = ImageDraw.Draw(text_img)
 
@@ -295,10 +325,14 @@ class Renderer(object):
         center = (bg.shape[1] // 2, bg.shape[0] // 2)
 
         # opencv seamlessClone require bgr image
-        text_img_bgr = np.ones((text_img.shape[0], text_img.shape[1], 3), np.uint8)
-        bg_bgr = np.ones((bg.shape[0], bg.shape[1], 3), np.uint8)
-        cv2.cvtColor(text_img, cv2.COLOR_GRAY2BGR, text_img_bgr)
-        cv2.cvtColor(bg, cv2.COLOR_GRAY2BGR, bg_bgr)
+        if not self.is_bgr():
+            text_img_bgr = np.ones((text_img.shape[0], text_img.shape[1], 3), np.uint8)
+            bg_bgr = np.ones((bg.shape[0], bg.shape[1], 3), np.uint8)
+            cv2.cvtColor(text_img, cv2.COLOR_GRAY2BGR, text_img_bgr)
+            cv2.cvtColor(bg, cv2.COLOR_GRAY2BGR, bg_bgr)
+        else:
+            text_img_bgr = text_img
+            bg_bgr = bg
 
         flag = np.random.choice([
             cv2.NORMAL_CLONE,
@@ -308,9 +342,10 @@ class Renderer(object):
 
         mixed_clone = cv2.seamlessClone(text_img_bgr, bg_bgr, text_mask, center, flag)
 
-        np_img = cv2.cvtColor(mixed_clone, cv2.COLOR_BGR2GRAY)
-
-        return np_img
+        if not self.is_bgr():
+            return cv2.cvtColor(mixed_clone, cv2.COLOR_BGR2GRAY)
+        else:
+            return mixed_clone
 
     def draw_text_with_random_space(self, draw, font, word, word_color, bg_width, bg_height):
         """ If random_space applied, text_x, text_y, word_width, word_height may change"""
@@ -379,9 +414,23 @@ class Renderer(object):
         light_or_dark = np.random.choice(choices, p=p)
 
         if light_or_dark == 0:
-            border_color = text_color + np.random.randint(0, 255 - text_color - 1)
+            if self.is_bgr():
+                border_color = (
+                    text_color[0] + np.random.randint(0, 255 - text_color[0] - 1),
+                    text_color[1] + np.random.randint(0, 255 - text_color[1] - 1),
+                    text_color[2] + np.random.randint(0, 255 - text_color[2] - 1)
+                )
+            else:
+                border_color = text_color + np.random.randint(0, 255 - text_color - 1)
         elif light_or_dark == 1:
-            border_color = text_color - np.random.randint(0, text_color + 1)
+            if self.is_bgr():
+                border_color = (
+                    text_color[0] - np.random.randint(0, text_color[0] + 1),
+                    text_color[1] - np.random.randint(0, text_color[1] + 1),
+                    text_color[2] - np.random.randint(0, text_color[2] + 1)
+                )
+            else:
+                border_color = text_color - np.random.randint(0, text_color + 1)
 
         # thin border
         draw.text((x - thickness, y), text, font=font, fill=border_color)
@@ -416,6 +465,9 @@ class Renderer(object):
 
         bg = self.apply_gauss_blur(bg)
 
+        if self.is_bgr():
+            bg = cv2.cvtColor(bg, cv2.COLOR_GRAY2BGR)
+
         return bg
 
     def gen_bg_from_image(self, width, height):
@@ -434,9 +486,9 @@ class Renderer(object):
 
         out = out[y_offset:y_offset + height, x_offset:x_offset + width]
 
-        out = self.apply_gauss_blur(out, ks=[7, 11, 13, 15, 17])
+        # out = self.apply_gauss_blur(out, ks=[7, 11, 13, 15, 17])
 
-        bg_mean = int(np.mean(out))
+        # bg_mean = int(np.mean(out))
 
         # TODO: find a better way to deal with background
         # alpha = 255 / bg_mean  # 对比度
@@ -601,3 +653,6 @@ class Renderer(object):
             croped_text_box_pnts[3][1] -= bottom_crop
 
         return croped_text_box_pnts
+
+    def is_bgr(self):
+        return self.cfg.font_color.enable or self.cfg.line_color.enable
