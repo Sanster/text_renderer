@@ -3,12 +3,20 @@
 """
 Generate training and test images.
 """
+import os
+
+# prevent opencv use all cpus
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+os.environ['MKL_NUM_THREADS'] = '1'
+os.environ['VECLIB_MAXIMUM_THREADS'] = '1'
+os.environ['NUMEXPR_NUM_THREADS'] = '1'
+
 import traceback
 import numpy as np
 
 import multiprocessing as mp
 from itertools import repeat
-import os
 
 import cv2
 
