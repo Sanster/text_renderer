@@ -6,4 +6,4 @@ matplotlib
 fontTools
 tenacity
 easyDict
-pyyaml
+pyyaml==5.1
