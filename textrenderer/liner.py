@@ -86,13 +86,19 @@ class Liner(object):
         0/1/2/3: 仅单边（左上右下）
         4/5/6/7: 两边都有线（左上，右上，右下，左下）
         """
+        if self.cfg.line.table_line.random_offset:
+            x_rand = random.randint(-1, 1)
+            y_rand = random.randint(-1, 1)
+        else:
+            x_rand = 1
+            y_rand = 1
         dst = word_img
         option = random.choice(self.linestate.tableline_options)
         thickness = random.choice(self.linestate.tableline_thickness)
-        top_y_offset = random.choice(self.linestate.tableline_y_offsets)
-        bottom_y_offset = random.choice(self.linestate.tableline_y_offsets)
-        left_x_offset = random.choice(self.linestate.tableline_x_offsets)
-        right_x_offset = random.choice(self.linestate.tableline_x_offsets)
+        top_y_offset = random.choice(self.linestate.tableline_y_offsets) * y_rand
+        bottom_y_offset = random.choice(self.linestate.tableline_y_offsets) * y_rand
+        left_x_offset = random.choice(self.linestate.tableline_x_offsets) * x_rand
+        right_x_offset = random.choice(self.linestate.tableline_x_offsets) * x_rand
 
         def is_top():
             return option in [1, 4, 5]

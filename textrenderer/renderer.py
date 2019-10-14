@@ -518,7 +518,7 @@ class Renderer(object):
         """
         模糊图像，模拟小图片放大的效果
         """
-        scale = random.uniform(1, self.cfg.prydown.max_scale)
+        scale = random.uniform(1, self.cfg.prydown.max_scale)  # todo: use different h/w scale
         height = img.shape[0]
         width = img.shape[1]
 

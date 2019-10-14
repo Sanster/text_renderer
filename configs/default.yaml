@@ -143,15 +143,16 @@ line:
 
   under_line:
     enable: true
-    fraction: 0.2
+    fraction: 0.1
 
   table_line:
     enable: true
-    fraction: 0.3
+    fraction: 0.8
+    random_offset: true # line will cross chars
 
   middle_line:
     enable: true
-    fraction: 0.5
+    fraction: 0.1
 
 # These operates are applied on the final output image,
 # so actually it can also be applied in training process as an data augmentation method.
