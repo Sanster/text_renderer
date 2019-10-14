@@ -36,6 +36,7 @@ Python3 main.py
 |Random char space small|![random char space small](./imgs/effects/random_space_small.jpg)|
 |Middle line|![middle line](./imgs/effects/line_middle.jpg)|
 |Table line|![table line](./imgs/effects/line_table.jpg)|
+|Table line(offset)|![table line offset](./imgs/effects/line_table_offset.jpg)|
 |Under line|![under line](./imgs/effects/line_under.jpg)|
 |Emboss|![emboss](./imgs/effects/emboss.jpg)|
 |Reverse color|![reverse color](./imgs/effects/reverse.jpg)|
