@@ -21,7 +21,7 @@ class EngCorpus(Corpus):
                     word = word.strip()
                     word = ''.join(filter(lambda x: x in self.charsets, word))
 
-                    if word != u'' and len(word) > 2:
+                    if word != u'':
                         self.corpus.append(word)
             print("Word count {}".format(len(self.corpus)))
 
