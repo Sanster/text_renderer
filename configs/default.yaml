@@ -119,7 +119,7 @@ prydown:
 
 texture:
   enable: true
-  fraction: 1
+  fraction: 0.05
 
   cloud:
     enable: true

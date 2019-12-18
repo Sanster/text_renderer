@@ -44,6 +44,7 @@ Python3 main.py
 |font_color|![font_color](./imgs/effects/colored.jpg)|
 |line_color|![line_color](./imgs/effects/table.jpg)|
 |extra_words|![extra_words](./imgs/effects/extra.jpg)|
+|texture|![texture](./imgs/effects/texture.jpg)|
 
 颜色配置说明:
 程序会随机拾取下方所配置颜色种类(按照fraction中的概率，所有颜色fraction相加需要等于1)，选中颜色种类后，rgb由l_boundary与h_boundary中取一个随机数确定； font_color 同理
@@ -69,6 +70,20 @@ extra_words:
     fraction: 0.5
   bottom:
     fraction: 0.5
+```
+文字纹理说明:
+开启选项后，会在文本上生成perling噪音的侵蚀效果(速度较慢)。可以调节octaves,persistence,scale参数调整纹理的效果(改变似乎不是非常明显)
+```
+texture:
+  enable: true
+  fraction: 0.05
+
+  cloud:
+    enable: true
+    fraction: 1
+    octaves: 2
+    persistence: 0.4
+    scale : 2000  
 ```
 
 
