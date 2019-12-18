@@ -1,7 +1,7 @@
 # Small font_size will make text looks like blured/prydown
 font_size:
-  min: 12
-  max: 32
+  min: 30
+  max: 42
 
 # choose font_color range
 # color boundary is in R,G,B format
@@ -77,7 +77,7 @@ crop:
 # Use image in bg_dir as background for text
 img_bg:
   enable: true
-  fraction: 1
+  fraction: 0.1
 
 # Not work when random_space applied
 text_border:
@@ -117,9 +117,20 @@ prydown:
   fraction: 0.06
   max_scale: 1.5 # Image will first resize to 1.5x, and than resize to 1x
 
+texture:
+  enable: true
+  fraction: 1
+
+  cloud:
+    enable: true
+    fraction: 1
+    octaves: 2
+    persistence: 0.4
+    scale : 2000  
+
 noise:
   enable: true
-  fraction: 0.3
+  fraction: 0.05
 
   gauss:
     enable: true

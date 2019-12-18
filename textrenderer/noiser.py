@@ -1,4 +1,6 @@
 import numpy as np
+from PIL import Image
+import noise
 import cv2
 
 
@@ -95,3 +97,49 @@ class Noiser(object):
 
         noisy = np.random.poisson(img * vals) / float(vals)
         return noisy
+
+
+class Texture(object):
+
+    def __init__(self, cfg):
+        self.cfg = cfg
+
+    def apply(self, img):
+        """
+        :param img:  text only img
+        """
+
+        p = []
+        funcs = []
+        if self.cfg.texture.cloud.enable:
+            p.append(self.cfg.texture.cloud.fraction)
+            funcs.append(self.apply_cloud_texture)
+
+        if len(p) == 0:
+            return img
+
+    def apply_cloud_texture(self, pure_bg, text):
+        height = pure_bg.size[1]
+        width = pure_bg.size[0]
+        noise = self.generate_fractal_noise_2d((height, width),
+                                               octaves = int(self.cfg.texture.cloud.octaves),
+                                               persistence = float(self.cfg.texture.cloud.persistence),
+                                               scale = float(self.cfg.texture.cloud.scale))
+        noise = 255 - (((noise + 1) / 2) * 255)
+        noise = np.where(noise<130, 30, 205)
+        text = np.array(text)
+        text[:, :, 3] = noise
+        img = Image.alpha_composite(pure_bg, Image.fromarray(text))
+        return img.convert('RGB')
+
+    def generate_fractal_noise_2d(self, shape, octaves=2, persistence=0.5, lacunarity = 6.0, scale = 2600.0):
+        np_noise = np.zeros(shape)
+        for i in range(shape[0]):
+            for j in range(shape[1]):
+                np_noise[i][j] = noise.pnoise2(i/scale, 
+                                            j/scale, 
+                                            octaves=octaves, 
+                                            persistence=persistence, 
+                                            lacunarity=lacunarity,
+                                            base=np.random.randint(1,100))
+        return np_noise

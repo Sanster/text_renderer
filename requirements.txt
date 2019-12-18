@@ -7,3 +7,4 @@ fontTools
 tenacity
 easyDict
 pyyaml
+noise
