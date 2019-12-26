@@ -125,21 +125,26 @@ class Texture(object):
                                                octaves = int(self.cfg.texture.cloud.octaves),
                                                persistence = float(self.cfg.texture.cloud.persistence),
                                                scale = float(self.cfg.texture.cloud.scale))
-        noise = 255 - (((noise + 1) / 2) * 255)
-        noise = np.where(noise<130, 30, 205)
+        noise = (((noise + 1) / 2) * 255)
         text = np.array(text)
         text[:, :, 3] = noise
         img = Image.alpha_composite(pure_bg, Image.fromarray(text))
         return img.convert('RGB')
 
-    def generate_fractal_noise_2d(self, shape, octaves=2, persistence=0.5, lacunarity = 6.0, scale = 2600.0):
+    def generate_fractal_noise_2d(self, shape, octaves=2, persistence=0.5, lacunarity = 6.0, scale = 100.0):
         np_noise = np.zeros(shape)
         for i in range(shape[0]):
             for j in range(shape[1]):
-                np_noise[i][j] = noise.pnoise2(i/scale, 
-                                            j/scale, 
-                                            octaves=octaves, 
-                                            persistence=persistence, 
-                                            lacunarity=lacunarity,
-                                            base=np.random.randint(1,100))
+                pixel = noise.pnoise2(i/scale, 
+                                      j/scale, 
+                                      octaves=octaves, 
+                                      persistence=persistence, 
+                                      lacunarity=lacunarity,
+                                      base=np.random.randint(1,100))
+                if pixel > 0.2:
+                    np_noise[i][j] = 0.5
+                elif pixel < -0.1:
+                    np_noise[i][j] = -1
+                else:
+                    np_noise[i][j] = 0.9
         return np_noise
