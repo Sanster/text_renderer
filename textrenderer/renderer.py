@@ -44,14 +44,14 @@ class Renderer(object):
                 self.fonts, corpus.chars_file)
 
     def gen_img(self, img_index):
-        word, font, word_size = self.pick_font(img_index)
+        word, font, word_size, font2 = self.pick_font(img_index)
         self.dmsg("after pick font")
 
         # Background's height should much larger than raw word image's height,
         # to make sure we can crop full word image after apply perspective
         bg = self.gen_bg(width=word_size[0] * 8, height=word_size[1] * 8)
         word_img, text_box_pnts, word_color = self.draw_text_on_bg(
-            word, font, bg)
+            word, font, bg, font2)
         self.dmsg("After draw_text_on_bg")
 
         if apply(self.cfg.crop):
@@ -236,7 +236,7 @@ class Renderer(object):
             b = np.random.randint(l_boundary[2], h_boundary[2])
         return (b, g, r)
 
-    def draw_text_on_bg(self, word, font, bg):
+    def draw_text_on_bg(self, word, font, bg, font2):
         """
         Draw word in the center of background
         :param word: word to draw
@@ -276,11 +276,11 @@ class Renderer(object):
                     'RGBA', (bg_width, bg_height), (255, 255, 255, 0))
                 draw = ImageDraw.Draw(pil_img)
                 self.draw_text_wrapper(
-                    draw, word, text_x - offset[0], text_y - offset[1], font, word_color)
+                    draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2)
                 pil_img = self.texture.apply_cloud_texture(pure_bg, pil_img)
             else:
                 self.draw_text_wrapper(
-                    draw, word, text_x - offset[0], text_y - offset[1], font, word_color)
+                    draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2)
             # draw.text((text_x - offset[0], text_y - offset[1]), word, fill=word_color, font=font)
 
         np_img = np.array(pil_img).astype(np.float32)
@@ -306,7 +306,7 @@ class Renderer(object):
         pil_img = Image.fromarray(np.uint8(text_img))
         draw = ImageDraw.Draw(pil_img)
         word_color = self.get_word_color()
-        word, font, word_size = self.pick_font(img_index)
+        word, font, word_size, font2 = self.pick_font(img_index)
         word_len = np.random.randint(1, len(word))
         word_height = word_size[1]
         word_width = word_size[0]
@@ -318,7 +318,7 @@ class Renderer(object):
         text_y = np.random.choice([text_y_t, text_y_b],
                                   p=[self.cfg.extra_words.top.fraction, self.cfg.extra_words.bottom.fraction])
         self.draw_text_wrapper(
-            draw, word[:word_len], text_x, text_y, font, word_color)
+            draw, word[:word_len], text_x, text_y, font, word_color, font2)
         np_img = np.array(pil_img).astype(np.float32)
         return np_img
 
@@ -362,12 +362,27 @@ class Renderer(object):
 
         return text_x, text_y, width, height
 
-    def draw_text_wrapper(self, draw, text, x, y, font, text_color):
+    def draw_text_wrapper(self, draw, text, x, y, font, text_color, font2):
         """
         :param x/y: 应该是移除了 offset 的
         """
         if apply(self.cfg.text_border):
             self.draw_border_text(draw, text, x, y, font, text_color)
+        
+        #todo: 整合draw_text_wrapper 与 draw_text_with_random_space
+        elif apply(self.cfg.second_font):
+            if self.cfg.second_font.font_color_change:
+                text_color2 = self.get_word_color()
+            else:
+                text_color2 = text_color
+            for i, c in enumerate(text):
+                if random.random() < self.cfg.second_font.change_rate:
+                    y_offset = np.random.uniform(0, font2.getoffset(c)[1])
+                    draw.text((x, y + y_offset), c, fill=text_color2, font=font2)
+                    x += font2.getsize(c)[0]
+                else:
+                    draw.text((x, y), c, fill=text_color, font=font)
+                    x += font.getsize(c)[0]
         else:
             draw.text((x, y), text, fill=text_color, font=font)
 
@@ -462,9 +477,11 @@ class Renderer(object):
             word = word[:self.max_chars]
 
         font_path = random.choice(self.fonts)
+        font_path_2 = random.choice(self.fonts)
 
         if self.strict:
             unsupport_chars = self.font_unsupport_chars[font_path]
+            unsupport_chars.extend(self.font_unsupport_chars[font_path_2])
             for c in word:
                 if c == ' ':
                     continue
@@ -477,8 +494,16 @@ class Renderer(object):
         font_size = random.randint(
             self.cfg.font_size.min, self.cfg.font_size.max)
         font = ImageFont.truetype(font_path, font_size)
+        if self.cfg.second_font.font_size_change:
+            font_size_2 = font_size - random.randint(1, 10)
+        else:
+            font_size_2 = font_size
+        if self.cfg.second_font.font_change:
+            font2 = ImageFont.truetype(font_path_2, font_size_2)
+        else:
+            font2 = ImageFont.truetype(font_path, font_size_2)
 
-        return word, font, self.get_word_size(font, word)
+        return word, font, self.get_word_size(font, word), font2
 
     def get_word_size(self, font, word):
         """

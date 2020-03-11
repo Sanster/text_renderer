@@ -45,6 +45,7 @@ Python3 main.py
 |line_color|![line_color](./imgs/effects/table.jpg)|
 |extra_words|![extra_words](./imgs/effects/extra.jpg)|
 |texture|![texture](./imgs/effects/texture.jpg)|
+|second_font|![second](./imgs/effects/second_font.jpg)
 
 颜色配置说明:
 程序会随机拾取下方所配置颜色种类(按照fraction中的概率，所有颜色fraction相加需要等于1)，选中颜色种类后，rgb由l_boundary与h_boundary中取一个随机数确定； font_color 同理
@@ -84,6 +85,19 @@ texture:
     octaves: 2
     persistence: 0.4
     scale : 2000  
+```
+
+第二字体说明:
+开启选项后，会在文本会在文本行上出现第二种字体，可以设置字体、颜色、大小是否与主字体相同。change_rate决定了在文本行中第二字体出现的概率
+```
+second_font:
+  enable: true
+  fraction: 0.5
+  change_rate: 0.3
+  font_change: true
+  font_size_change: true
+  font_color_change: true
+
 ```
 
 

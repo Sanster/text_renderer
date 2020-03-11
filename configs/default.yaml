@@ -23,6 +23,17 @@ font_color:
     l_boundary: 139,70,19
     h_boundary: 160,82,43
 
+# second font in one line
+# choose what's different from first font
+
+second_font:
+  enable: true
+  fraction: 0.5
+  change_rate: 0.3
+  font_change: true
+  font_size_change: true
+  font_color_change: true
+
 # choose line_color range
 # color boundary is in R,G,B format
 line_color:
