@@ -547,8 +547,10 @@ class Renderer(object):
         return dst_img, dst_img_pnts, dst_text_pnts
 
     def apply_blur_on_output(self, img):
-        if prob(0.5):
-            return self.apply_gauss_blur(img, [3, 5])
+        if prob(1/3):
+            return self.apply_gauss_blur(img)
+        elif prob(0.5):
+            return self.apply_motion_blur(img)
         else:
             return self.apply_norm_blur(img)
 
@@ -570,6 +572,19 @@ class Renderer(object):
             ks = [2, 3]
         kernel = random.choice(ks)
         img = cv2.blur(img, (kernel, kernel))
+        return img
+
+    def apply_motion_blur(self, img, ks=None, angle=None):
+        if ks is None:
+            ks = [7, 9, 11, 13]
+        ksize = random.choice(ks)
+        if angle is None:
+            angle = random.randint(0, 360)
+        kernel = np.zeros((ksize, ksize), dtype=np.float32)
+        kernel[ (ksize-1)// 2 , :] = np.ones(ksize, dtype=np.float32)
+        kernel = cv2.warpAffine(kernel, cv2.getRotationMatrix2D( (ksize / 2 -0.5 , ksize / 2 -0.5 ) , angle, 1.0), (ksize, ksize) ) 
+        kernel = kernel * ( 1.0 / np.sum(kernel) )   
+        img = cv2.filter2D(img, -1, kernel)
         return img
 
     def apply_prydown(self, img):
