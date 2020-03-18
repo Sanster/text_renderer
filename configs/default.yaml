@@ -120,13 +120,24 @@ perspective_transform:
 
 blur:
   enable: true
-  fraction: 0.03
+  fraction: 0.1
 
-# If an image is applied blur, it will not be applied prydown
-prydown:
-  enable: true
-  fraction: 0.06
-  max_scale: 1.5 # Image will first resize to 1.5x, and than resize to 1x
+  gauss:
+    enable: true
+    fraction: 0.25
+  
+  norm:
+    enable: true
+    fraction: 0.25
+
+  motion:
+    enable: true
+    fraction: 0.25
+
+  prydown:
+    enable: true
+    fraction: 0.25
+    max_scale: 1.5
 
 texture:
   enable: true

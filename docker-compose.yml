@@ -1,0 +1,5 @@
+version: "3"
+
+services: 
+    text_render:
+        build: .

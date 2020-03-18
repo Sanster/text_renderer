@@ -101,16 +101,9 @@ class Renderer(object):
             word_img = self.noiser.apply(word_img)
             self.dmsg("After noiser")
 
-        blured = False
         if apply(self.cfg.blur):
-            blured = True
             word_img = self.apply_blur_on_output(word_img)
             self.dmsg("After blur")
-
-        if not blured:
-            if apply(self.cfg.prydown):
-                word_img = self.apply_prydown(word_img)
-                self.dmsg("After prydown")
 
         word_img = np.clip(word_img, 0., 255.)
 
@@ -547,12 +540,30 @@ class Renderer(object):
         return dst_img, dst_img_pnts, dst_text_pnts
 
     def apply_blur_on_output(self, img):
-        if prob(1/3):
-            return self.apply_gauss_blur(img)
-        elif prob(0.5):
-            return self.apply_motion_blur(img)
-        else:
-            return self.apply_norm_blur(img)
+        p = []
+        funcs = []
+        if self.cfg.blur.gauss.enable:
+            p.append(self.cfg.blur.gauss.fraction)
+            funcs.append(self.apply_gauss_blur)
+
+        if self.cfg.blur.norm.enable:
+            p.append(self.cfg.blur.norm.fraction)
+            funcs.append(self.apply_norm_blur)
+
+        if self.cfg.blur.motion.enable:
+            p.append(self.cfg.blur.motion.fraction)
+            funcs.append(self.apply_motion_blur)
+
+        if self.cfg.blur.prydown.enable:
+            p.append(self.cfg.blur.prydown.fraction)
+            funcs.append(self.apply_prydown)
+
+        if len(p) == 0:
+            return img
+        
+        blur_func = np.random.choice(funcs, p=p)
+
+        return blur_func(img)
 
     def apply_gauss_blur(self, img, ks=None):
         if ks is None:
@@ -592,7 +603,7 @@ class Renderer(object):
         模糊图像，模拟小图片放大的效果
         """
         scale = random.uniform(
-            1, self.cfg.prydown.max_scale)  # todo: use different h/w scale
+            1, self.cfg.blur.prydown.max_scale)  # todo: use different h/w scale
         height = img.shape[0]
         width = img.shape[1]
 

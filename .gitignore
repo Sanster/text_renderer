@@ -3,6 +3,7 @@
 __pycache__/
 *.pyc
 .DS_Store
+.devcontainer/
 
 data/fonts/
 data/corpus/**
