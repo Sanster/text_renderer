@@ -71,13 +71,13 @@ class Noiser(object):
         num_salt = np.ceil(amount * img.size * s_vs_p)
         coords = [np.random.randint(0, i - 1, int(num_salt))
                   for i in img.shape]
-        out[coords] = 255.
+        out[np.array(coords)] = 255.
 
         # Pepper mode
         num_pepper = np.ceil(amount * img.size * (1. - s_vs_p))
         coords = [np.random.randint(0, i - 1, int(num_pepper))
                   for i in img.shape]
-        out[coords] = 0
+        out[np.array(coords)] = 0
         return out
 
     def apply_poisson_noise(self, img):
