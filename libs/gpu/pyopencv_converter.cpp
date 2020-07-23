@@ -104,7 +104,9 @@ public:
         {
             CV_Error(Error::StsAssert, "The data should normally be NULL!");
             // probably this is safe to do in such extreme case
-            return stdAllocator->allocate(dims0, sizes, type, data, step, flags, usageFlags);
+            return stdAllocator->allocate(dims0, sizes, type, data, step, 
+                cv::AccessFlag(flags), usageFlags
+            );
         }
         PyEnsureGIL gil;
 
@@ -129,7 +131,9 @@ public:
 
     bool allocate(UMatData* u, int accessFlags, UMatUsageFlags usageFlags) const
     {
-        return stdAllocator->allocate(u, accessFlags, usageFlags);
+        return stdAllocator->allocate(u, 
+            cv::AccessFlag(accessFlags), usageFlags
+        );
     }
 
     void deallocate(UMatData* u) const
