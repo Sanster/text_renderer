@@ -9,6 +9,7 @@ from distutils.spawn import find_executable
 import sys
 from distutils import sysconfig, log
 from contextlib import contextmanager
+import platform
 
 """
 Run setup with the following command:
@@ -43,7 +44,11 @@ def write_cmakelist(opencv_install_dir):
     lines.append('find_package(OpenCV)')
     lines.append('set(MYDEP_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS} CACHE PATH "")')
     lines.append('set(MYDEP_LIBS ${OpenCV_LIBS} CACHE PATH "")')
-    lines.append('set(MYDEP_LIBRARY_DIRS "${OpenCV_DIR}/${OpenCV_ARCH}/${OpenCV_RUNTIME}/lib" CACHE PATH "")')
+
+    if (platform.system()=='Windows'):
+        lines.append('set(MYDEP_LIBRARY_DIRS "${OpenCV_DIR}/${OpenCV_ARCH}/${OpenCV_RUNTIME}/lib" CACHE PATH "")')
+    else:
+        lines.append('set(MYDEP_LIBRARY_DIRS "${OpenCV_INSTALL_PATH}/lib" CACHE PATH "")')
 
     fout = open('CMakeLists.txt', 'w', encoding='utf-8')
     for line in lines:
@@ -55,7 +60,10 @@ cmake = find_executable('cmake')
 assert cmake, 'Could not find "cmake" executable!'
 
 # You may modify me here!
-write_cmakelist("D:/work/opencv-4.3.0/build/vs2017-x64-gpu/install")
+if platform.system()=='Windows':
+    write_cmakelist("D:/work/opencv-4.3.0/build/vs2017-x64-gpu/install")
+else:
+    write_cmakelist("/home/zz/soft/opencv-3.4.11/share/OpenCV")
 
 TOP_DIR = os.path.realpath(os.path.dirname(__file__))
 CMAKE_BUILD_DIR = os.path.join(TOP_DIR, '.setuptools-cmake-build')
@@ -64,13 +72,11 @@ with cd(CMAKE_BUILD_DIR):
     cmake_args = [
         cmake,
         '-DBUILD_SHARED_LIBS=OFF',
-        '-DPYTHON_EXECUTABLE:FILEPATH={}'.format(sys.executable),
-        '-DPYTHON_INCLUDE_DIR={}'.format(sysconfig.get_python_inc()),
-        '-DBUILD_TEST=OFF',
-        '-DBUILD_BENCHMARK=OFF',
-        '-DBUILD_BINARY=OFF',
-        '-G', 'Visual Studio 15 2017 Win64'
+        '-DCMAKE_BUILD_TYPE=Release'
     ]
+    if(platform.system()=='Windows'):
+        cmake_args.append('-G')
+        cmake_args.append('Visual Studio 15 2017 Win64')
     cmake_args.append(TOP_DIR)
     subprocess.check_call(cmake_args)
 
@@ -90,11 +96,11 @@ fin = open(cmake_cache_file, 'r')
 for line in fin.readlines():
     line = line.strip()
     if line.startswith('MYDEP_INCLUDE_DIRS'):
-        mydep_include_dirs = [line.split('=')[1]]
+        mydep_include_dirs = line.split('=')[1].split(';')
     if line.startswith('MYDEP_LIBRARY_DIRS'):
         mydep_library_dirs = [line.split('=')[1]]
     if line.startswith('MYDEP_LIBS'):
-        mydep_libs = [line.split('=')[1]]
+        mydep_libs = line.split('=')[1].split(';')
 fin.close()
 
 
@@ -109,16 +115,17 @@ CUR_DIR = os.path.dirname(__file__)
 #opencv_libs = [str(lib) for lib in opencv_libs_str.strip().split()]
 #opencv_incs = [str(inc) for inc in opencv_incs_str.strip().split()]
 
+mydep_include_dirs.append(np.get_include())
+
 extensions = [
     Extension('GpuWrapper',
               sources=[os.path.join(CUR_DIR, 'GpuWrapper.pyx')],
               language='c++',
-              include_dirs=[np.get_include()] + mydep_include_dirs,
+              include_dirs=mydep_include_dirs,
               libraries=mydep_libs,
               library_dirs=mydep_library_dirs,
-              #define_macros=[('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION')]
-              )
-              #extra_link_args=opencv_libs)
+              define_macros=[('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION')],
+              extra_link_args=['-v'])
 ]
 
 setup(

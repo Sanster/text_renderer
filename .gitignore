@@ -24,3 +24,5 @@ libs/gpu/build/
 output/
 .caches
 
+libs/gpu/.setuptools-cmake-build
+libs/gpu/CMakeLists.txt
