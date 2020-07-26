@@ -78,94 +78,9 @@ chars not supported(4971):
 ```
 
 # Generate image using GPU
-If you want to use GPU to make generate image faster, first compile OpenCV 3.x with CUDA (OpenCV 4.x won't work) and Python suport.
+If you want to use GPU to make generate image faster, first compile OpenCV 3.x with CUDA (OpenCV 4.x won't work), opencv contrib, and Python suport.
 
-For example, OpenCV 3.4.11 with Python 3.8.1(via Miniconda) with NVIDIA GTX 1080Ti on Ubuntu 20.04:
-
-```bash
-# opencv-3.4.11
-cd ~/work;
-git clone https://gitee.com/mirros/opencv opencv-3.4.11
-cd opencv-3.4.11
-git checkout -b 3.4.11 3.4.11
-
-# opencv_contrib-3.4.11
-cd ..
-git clone https://gitee.com/mirrors/opencv_contrib opencv_contrib-3.4.11
-cd opencv_contrib-3.4.11
-git checkout -b 3.4.11 3.4.11
-
-# nvidia card compute capability
-cd ..
-git clone https://github.com/zchrissirhcz/check_ComputeCapability
-cd check_ComputeCapability
-make
-./check_cc
-
-# prepare compile script
-cd ../opencv-3.4.11
-vim compile.sh
-```
-
-`compile.sh`'s content:
-```bash
-#!/bin/bash
-
-set -x
-set -e
-
-mkdir -p $HOME/soft
-
-rm -rf build
-mkdir -p build
-cd build
-
-LOG="../cmake.log"
-touch $LOG
-rm $LOG
-
-exec &> >(tee -a "$LOG")
-
-cmake .. \
-    -D CMAKE_BUILD_TYPE=Release \
-    -D CMAKE_INSTALL_PREFIX=$HOME/soft/opencv-3.4.11 \
-    -D WITH_CUDA=ON \
-    -D CUDA_ARCH_BIN=6.1 \
-    -D OPENCV_EXTRA_MODULES_PATH=$HOME/work/opencv_contrib-3.4.11/modules \
-    -D INSTALL_PYTHON_EXAMPLES=ON \
-    -D OPENCV_PYTHON3_VERSION=3.8 \
-    -D PYTHON3_EXECUTABLE=$HOME/soft/miniconda3/bin/python \
-    -D PYTHON3_INCLUDE_DIR=$HOME/soft/miniconda3/include/python3.8 \
-    -D PYTHON3_LIBRARY=$HOME/soft/miniconda3/lib/libpython3.8.so \
-    -D BUILD_opencv_python3=ON \
-    -D BUILD_opencv_python2=OFF \
-    -D PYTHON_DEFAULT_EXECUTABLE=$HOME/soft/miniconda3/bin/python \
-    -D HAVE_opencv_python3=ON \
-    -D BUILD_TIFF=ON \
-    -D WITH_VTK=OFF \
-    -D WITH_MATLAB=OFF \
-    -D BUILD_DOCS=OFF \
-
-make -j4
-make install
-```
-
-Then do:
-```bash
-# compile opencv
-./compile.sh
-
-# compile cython module
-cd libs/gpu
-python setup.py build_ext --inplace
-```
-
-Finally, and add `--gpu` option when run `main.py`
-
-refs: 
-- [Accessing OpenCV CUDA Functions from Python (No PyCUDA)](https://stackoverflow.com/questions/42125084/accessing-opencv-cuda-functions-from-python-no-pycuda)
-- [Compiling OpenCV with CUDA support](https://www.pyimagesearch.com/2016/07/11/compiling-opencv-with-cuda-support/)
-
+See [build-gpu-libs.md](build-gpu-libs.md) for more details.
 
 # Debug mode
 Run `python3 main.py --debug` will save images with extract information.
