@@ -105,6 +105,9 @@ git clone https://github.com/zchrissirhcz/text_renderer
 cd text_renderder
 cd libs
 cd gpu
+
+# Let's make sure VS2017 will be called, instead of other version of VS if there's multiple
+call "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/vcvarsall.bat" amd64
 python setup.py build_ext --inplace
 ```
 
