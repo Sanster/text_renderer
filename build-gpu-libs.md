@@ -108,6 +108,8 @@ cd gpu
 python setup.py build_ext --inplace
 ```
 
+**Note: if you're using different opencv directory, please modify it in `setup.py` (search `write_cmakelist` as keyword) before building.**
+
 Finally, use the compiled OpenCV Python lib and GpuWrapper lib together, i.e. in `math_utils.py`, modify the imports to be like this:
 ```Python
 import sys
@@ -199,6 +201,8 @@ Then do:
 cd libs/gpu
 python setup.py build_ext --inplace
 ```
+
+**Note: if you're using different opencv directory, please modify it in `setup.py` (search `write_cmakelist` as keyword) before building.**
 
 Then use this built opencv2 python library and GpuWrapper together, such as in `math_utils.py`. Modify its imports like in the windows example.
 
