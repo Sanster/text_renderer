@@ -42,6 +42,7 @@ def write_cmakelist(opencv_install_dir):
     lines.append('set(CMAKE_CXX_STANDARD 11)')
     lines.append('set(OpenCV_DIR "{:s}" CACHE PATH "")'.format(opencv_install_dir))
     lines.append('find_package(OpenCV)')
+    lines.append('set(MYDEP_VERSION_STR "${OpenCV_VERSION_MAJOR}${OpenCV_VERSION_MINOR}${OpenCV_VERSION_PATCH}" CACHE STRING "")')
     lines.append('set(MYDEP_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS} CACHE PATH "")')
     lines.append('set(MYDEP_LIBS ${OpenCV_LIBS} CACHE PATH "")')
 
@@ -61,7 +62,7 @@ assert cmake, 'Could not find "cmake" executable!'
 
 # You may modify me here!
 if platform.system()=='Windows':
-    write_cmakelist("D:/work/opencv-4.3.0/build/vs2017-x64-gpu/install")
+    write_cmakelist("D:/lib/opencv/3.4.11")
 else:
     write_cmakelist("/home/zz/soft/opencv-3.4.11/share/OpenCV")
 
@@ -74,10 +75,12 @@ with cd(CMAKE_BUILD_DIR):
         '-DBUILD_SHARED_LIBS=OFF',
         '-DCMAKE_BUILD_TYPE=Release'
     ]
+    print('----- platform.system()=', platform.system())
     if(platform.system()=='Windows'):
         cmake_args.append('-G')
         cmake_args.append('Visual Studio 15 2017 Win64')
     cmake_args.append(TOP_DIR)
+    print('----- cmake commands:', cmake_args)
     subprocess.check_call(cmake_args)
 
 cmake_cache_file = os.path.join(CMAKE_BUILD_DIR, 'CMakeCache.txt')
@@ -101,6 +104,10 @@ for line in fin.readlines():
         mydep_library_dirs = [line.split('=')[1]]
     if line.startswith('MYDEP_LIBS'):
         mydep_libs = line.split('=')[1].split(';')
+    if line.startswith('MYDEP_VERSION'):
+        mydep_version = line.split('=')[1]
+if platform.system()=='Windows':
+    mydep_libs = [_+mydep_version for _ in mydep_libs]
 fin.close()
 
 
@@ -125,7 +132,8 @@ extensions = [
               libraries=mydep_libs,
               library_dirs=mydep_library_dirs,
               define_macros=[('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION')],
-              extra_link_args=['-v'])
+              #extra_link_args=['-v']
+              )
 ]
 
 setup(
