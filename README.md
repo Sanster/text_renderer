@@ -1,4 +1,4 @@
-**New version release**：https://github.com/oh-my-ocr/text_renderer
+# New version release：https://github.com/oh-my-ocr/text_renderer
 
 # Text Renderer
 Generate text images for training deep learning OCR model (e.g. [CRNN](https://github.com/bgshih/crnn)).
