@@ -264,7 +264,7 @@ class Renderer(object):
 
         if apply(self.cfg.random_space):
             text_x, text_y, word_width, word_height = self.draw_text_with_random_space(draw, font, word, word_color,
-                                                                                       bg_width, bg_height)
+                                                                                       bg_width, bg_height, pure_bg)
         else:
             if apply(self.cfg.texture):
                 pure_bg = Image.new(
@@ -276,8 +276,12 @@ class Renderer(object):
                     draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2)
                 pil_img = self.texture.apply_cloud_texture(pure_bg, pil_img)
             else:
-                self.draw_text_wrapper(
-                    draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2)
+                if self.fonts_by_image:
+                    pil_img = self.draw_text_wrapper(
+                        draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2, pure_bg)
+                else:
+                    self.draw_text_wrapper(
+                        draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2, pure_bg)
             # draw.text((text_x - offset[0], text_y - offset[1]), word, fill=word_color, font=font)
 
         np_img = np.array(pil_img).astype(np.float32)
@@ -320,11 +324,11 @@ class Renderer(object):
         text_y = np.random.choice([text_y_t, text_y_b],
                                   p=[self.cfg.extra_words.top.fraction, self.cfg.extra_words.bottom.fraction])
         self.draw_text_wrapper(
-            draw, word[:word_len], text_x, text_y, font, word_color, font2)
+            draw, word[:word_len], text_x, text_y, font, word_color, font2, np.uint8(text_img))
         np_img = np.array(pil_img).astype(np.float32)
         return np_img
 
-    def draw_text_with_random_space(self, draw, font, word, word_color, bg_width, bg_height):
+    def draw_text_with_random_space(self, draw, font, word, word_color, bg_width, bg_height, pil_img):
         """ If random_space applied, text_x, text_y, word_width, word_height may change"""
         width = 0
         height = 0
@@ -362,8 +366,7 @@ class Renderer(object):
         for i, c in enumerate(word):
             # self.draw_text_wrapper(draw, c, c_x, c_y - y_offset, font, word_color, force_text_border)
             if self.fonts_by_image:
-                draw.floodfill(font[c], (c_x, c_y - y_offset))
-                #pil_img = self.mix_seamless_bg(font[c], pil_img, (c_x, c_y - y_offset))
+                pil_img = self.mix_seamless_bg(font[c], pil_img, (c_x, c_y - y_offset))
             else:
                 draw.text((c_x, c_y - y_offset), c, fill=word_color, font=font)
 
@@ -371,7 +374,7 @@ class Renderer(object):
 
         return text_x, text_y, width, height
 
-    def draw_text_wrapper(self, draw, text, x, y, font, text_color, font2):
+    def draw_text_wrapper(self, draw, text, x, y, font, text_color, font2, pil_img):
         """
         :param x/y: 应该是移除了 offset 的
         """
@@ -391,7 +394,7 @@ class Renderer(object):
                     x += font2.getsize(c)[0]
                 else:
                     if self.fonts_by_image:
-                        draw.floodfill(font[c], (x, y))
+                        pil_img = self.mix_seamless_bg(font[c], pil_img, (x, y))
                         x += font[c].shape[1]
                     else:
                         draw.text((x, y), c, fill=text_color, font=font)
@@ -399,10 +402,11 @@ class Renderer(object):
         else:
             if self.fonts_by_image:
                 for c in text:
-                    draw.floodfill(font[c], (x, y))
+                    pil_img = self.mix_seamless_bg(font[c], pil_img, (x, y))
                     x += font[c].shape[1]
             else:
                 draw.text((x, y), text, fill=text_color, font=font)
+        return pil_img
 
     def draw_border_text(self, draw, text, x, y, font, text_color):
         """
