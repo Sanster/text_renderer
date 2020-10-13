@@ -74,21 +74,21 @@ curve:
 
 # random crop text height
 crop:
-  enable: false
+  enable: true
   fraction: 0.5
 
   # top and bottom will applied equally
   top:
     min: 5
-    max: 10 # in pixel, this value should small than img_height
+    max: 15 # in pixel, this value should small than img_height
   bottom:
     min: 5
-    max: 10 # in pixel, this value should small than img_height
+    max: 15 # in pixel, this value should small than img_height
 
 # Use image in bg_dir as background for text
 img_bg:
   enable: true
-  fraction: 0.1
+  fraction: 0.5
 
 # Not work when random_space applied
 text_border:
@@ -152,7 +152,7 @@ texture:
 
 noise:
   enable: true
-  fraction: 0.05
+  fraction: 0.03
 
   gauss:
     enable: true
@@ -172,7 +172,7 @@ noise:
 
 line:
   enable: true
-  fraction: 0.08
+  fraction: 0.1
 
   under_line:
     enable: true

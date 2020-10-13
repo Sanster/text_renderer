@@ -1,10 +1,10 @@
 Cython == 0.29.21
 opencv-python == 4.4.0.44
-pillow == 7.2.0
-numpy == 1.19.2
+pillow == 7.0.0
+numpy == 1.15.0
 matplotlib == 3.3.2
 fontTools == 4.16.1
-tenacity == 6.2.0
+tenacity == 6.1.0
 easyDict == 1.9
 pyyaml == 5.3.1
 noise == 1.2.2

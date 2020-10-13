@@ -27,7 +27,7 @@ def get_font_paths(fonts_dir):
 
 
 def get_font_paths_from_list(list_filename):
-    with open(list_filename,encoding="utf-8") as f:
+    with open(list_filename, encoding="utf-8") as f:
         lines = f.readlines()
         fonts = [os.path.abspath(l.strip()) for l in lines]
 
@@ -66,11 +66,11 @@ def check_font_chars(ttf, charset):
     :param charset: chars
     :return: unsupported_chars, supported_chars
     """
-    #chars = chain.from_iterable([y + (Unicode[y[0]],) for y in x.cmap.items()] for x in ttf["cmap"].tables)
-    chars_int=set()
+    # chars = chain.from_iterable([y + (Unicode[y[0]],) for y in x.cmap.items()] for x in ttf["cmap"].tables)
+    chars_int = set()
     for table in ttf['cmap'].tables:
-        for k,v in table.cmap.items():
-            chars_int.add(k)            
+        for k, v in table.cmap.items():
+            chars_int.add(k)
 
     unsupported_chars = []
     supported_chars = []
@@ -125,7 +125,7 @@ def get_fonts_chars(fonts, chars_file):
     return out
 
 
-def get_unsupported_chars(fonts, chars_file):
+def get_unsupported_chars(fonts, chars_file, fonts_by_image=False):
     """
     Get fonts unsupported chars by loads/saves font supported chars from cache file
     :param fonts:
@@ -136,11 +136,17 @@ def get_unsupported_chars(fonts, chars_file):
     """
     charset = load_chars(chars_file)
     charset = ''.join(charset)
-    fonts_chars = get_fonts_chars(fonts, chars_file)
     fonts_unsupported_chars = {}
-    for font_path, chars in fonts_chars.items():
-        unsupported_chars = list(filter(lambda x: x not in chars, charset))
-        fonts_unsupported_chars[font_path] = unsupported_chars
+    if fonts_by_image:
+        for font_path in fonts:
+            chars = [x.replace(".png", "") for x in os.listdir(font_path)]
+            unsupported_chars = list(filter(lambda x: x not in chars, charset))
+            fonts_unsupported_chars[font_path] = unsupported_chars
+    else:
+        fonts_chars = get_fonts_chars(fonts, chars_file)
+        for font_path, chars in fonts_chars.items():
+            unsupported_chars = list(filter(lambda x: x not in chars, charset))
+            fonts_unsupported_chars[font_path] = unsupported_chars
     return fonts_unsupported_chars
 
 

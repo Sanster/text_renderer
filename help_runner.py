@@ -7,12 +7,12 @@ import subprocess
 configs = [
     dict(tag='test1',
          num_img=10,
-         img_width=150),
+         img_width=150,
+         debug=True,
+         strict=True),
     dict(tag='test2',
          num_img=20,
-         debug=False,
-         corpus_mode='list',
-         corpus_dir='./data/list_corpus')
+         strict=True)
 ]
 
 

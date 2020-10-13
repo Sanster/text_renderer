@@ -25,6 +25,9 @@ def parse_args():
     parser.add_argument('--config_file', type=str, default='./configs/default.yaml',
                         help='Set the parameters when rendering images')
 
+    parser.add_argument('--fonts_by_image', type=bool, default=False,
+                        help='Fonts use image')
+
     parser.add_argument('--fonts_list', type=str, default='./data/fonts_list/chn.txt',
                         help='Fonts file path to use')
 
