@@ -6,13 +6,16 @@ import subprocess
 # See parse_args for supported arguments
 configs = [
     dict(tag='test1',
-         num_img=10,
-         img_width=150),
-    dict(tag='test2',
-         num_img=20,
-         debug=False,
+         num_img=50,
+         img_width=150,
+         fonts_by_image=True,
+         corpus_dir='./data/corpus_line',
          corpus_mode='list',
-         corpus_dir='./data/list_corpus')
+         fonts_list='./data/fonts_list/img_font.txt',
+         strict=True),
+    dict(tag='test2',
+         num_img=50,
+         strict=True)
 ]
 
 

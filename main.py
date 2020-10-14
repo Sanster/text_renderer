@@ -39,7 +39,8 @@ renderer = Renderer(corpus, fonts, bgs, cfg,
                     clip_max_chars=flags.clip_max_chars,
                     debug=flags.debug,
                     gpu=flags.gpu,
-                    strict=flags.strict)
+                    strict=flags.strict,
+                    fonts_by_image=flags.fonts_by_image)
 
 
 def start_listen(q, fname):

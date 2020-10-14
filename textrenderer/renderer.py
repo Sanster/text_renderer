@@ -4,6 +4,8 @@ import numpy as np
 import cv2
 from PIL import ImageFont, Image, ImageDraw
 from tenacity import retry
+import os
+import time
 
 import libs.math_utils as math_utils
 from libs.utils import draw_box, draw_bbox, prob, apply
@@ -18,7 +20,7 @@ from textrenderer.remaper import Remaper
 
 class Renderer(object):
     def __init__(self, corpus, fonts, bgs, cfg, width=256, height=32,
-                 clip_max_chars=False, debug=False, gpu=False, strict=False):
+                 clip_max_chars=False, debug=False, gpu=False, strict=False, fonts_by_image=False):
         self.corpus = corpus
         self.fonts = fonts
         self.bgs = bgs
@@ -30,18 +32,20 @@ class Renderer(object):
         self.gpu = gpu
         self.strict = strict
         self.cfg = cfg
+        self.fonts_by_image = fonts_by_image
 
         self.timer = Timer()
         self.liner = Liner(cfg)
         self.noiser = Noiser(cfg)
         self.texture = Texture(cfg)
         self.remaper = Remaper(cfg)
+        self.start = time.time()
 
         self.create_kernals()
 
         if self.strict:
             self.font_unsupport_chars = font_utils.get_unsupported_chars(
-                self.fonts, corpus.chars_file)
+                self.fonts, corpus.chars_file, self.fonts_by_image)
 
     def gen_img(self, img_index):
         word, font, word_size, font2 = self.pick_font(img_index)
@@ -246,7 +250,7 @@ class Renderer(object):
         word_height = word_size[1]
         word_width = word_size[0]
 
-        offset = font.getoffset(word)
+        offset = (0, 0) if self.fonts_by_image else font.getoffset(word)
         pure_bg = np.ones((bg_height, bg_width, 3)) * 255
 
         pil_img = Image.fromarray(np.uint8(pure_bg))
@@ -260,20 +264,24 @@ class Renderer(object):
 
         if apply(self.cfg.random_space):
             text_x, text_y, word_width, word_height = self.draw_text_with_random_space(draw, font, word, word_color,
-                                                                                       bg_width, bg_height)
+                                                                                       bg_width, bg_height, pure_bg)
         else:
-            if apply(self.cfg.texture):
+            if apply(self.cfg.texture) and not self.fonts_by_image:
                 pure_bg = Image.new(
                     'RGBA', (bg_width, bg_height), (255, 255, 255, 255))
                 pil_img = Image.new(
                     'RGBA', (bg_width, bg_height), (255, 255, 255, 0))
                 draw = ImageDraw.Draw(pil_img)
-                self.draw_text_wrapper(
-                    draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2)
+                _ = self.draw_text_wrapper(
+                    draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2, pil_img)
                 pil_img = self.texture.apply_cloud_texture(pure_bg, pil_img)
             else:
-                self.draw_text_wrapper(
-                    draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2)
+                if self.fonts_by_image:
+                    pil_img = self.draw_text_wrapper(
+                        draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2, pure_bg)
+                else:
+                    _ = self.draw_text_wrapper(
+                        draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2, pure_bg)
             # draw.text((text_x - offset[0], text_y - offset[1]), word, fill=word_color, font=font)
 
         np_img = np.array(pil_img).astype(np.float32)
@@ -287,12 +295,17 @@ class Renderer(object):
 
         return np_img, text_box_pnts, word_color
 
-    def mix_seamless_bg(self, text_img, bg):
+    def mix_seamless_bg(self, text_img, bg, anchor=None):
         text_img = np.array(text_img).astype(np.uint8)
         text_mask = 255 * np.ones(text_img.shape, text_img.dtype)
-        center = (bg.shape[1] // 2, bg.shape[0] // 2)
+        if self.fonts_by_image and anchor:
+            h, w = text_img.shape[:2]
+            center = (int(anchor[0] + w / 2), int(anchor[1] + h / 2))
+            bg = bg.astype(np.uint8)
+        else:
+            center = (bg.shape[1] // 2, bg.shape[0] // 2)
         mixed_clone = cv2.seamlessClone(
-            text_img, bg, text_mask, center, cv2.MIXED_CLONE)
+                          text_img, bg, text_mask, center, cv2.MIXED_CLONE)
         return mixed_clone
 
     def draw_extra_random_word(self, text_img, text_box_pnts, img_index):
@@ -310,19 +323,22 @@ class Renderer(object):
             text_box_pnts[2][1] - word_height * 0.5
         text_y = np.random.choice([text_y_t, text_y_b],
                                   p=[self.cfg.extra_words.top.fraction, self.cfg.extra_words.bottom.fraction])
-        self.draw_text_wrapper(
-            draw, word[:word_len], text_x, text_y, font, word_color, font2)
+        _ = self.draw_text_wrapper(
+            draw, word[:word_len], text_x, text_y, font, word_color, font2, np.uint8(text_img))
         np_img = np.array(pil_img).astype(np.float32)
         return np_img
 
-    def draw_text_with_random_space(self, draw, font, word, word_color, bg_width, bg_height):
+    def draw_text_with_random_space(self, draw, font, word, word_color, bg_width, bg_height, pil_img):
         """ If random_space applied, text_x, text_y, word_width, word_height may change"""
         width = 0
         height = 0
         chars_size = []
         y_offset = 10 ** 5
         for c in word:
-            size = font.getsize(c)
+            if self.fonts_by_image:
+                size = font[c].shape[:2] if c in font else (font_size, font_size)
+            else:
+                size = font.getsize(c)
             chars_size.append(size)
 
             width += size[0]
@@ -332,7 +348,7 @@ class Renderer(object):
 
             # Min chars y offset as word y offset
             # Assume only y offset
-            c_offset = font.getoffset(c)
+            c_offset = (0, 0) if self.fonts_by_image else font.getoffset(c)
             if c_offset[1] < y_offset:
                 y_offset = c_offset[1]
 
@@ -349,13 +365,16 @@ class Renderer(object):
 
         for i, c in enumerate(word):
             # self.draw_text_wrapper(draw, c, c_x, c_y - y_offset, font, word_color, force_text_border)
-            draw.text((c_x, c_y - y_offset), c, fill=word_color, font=font)
+            if self.fonts_by_image:
+                pil_img = self.mix_seamless_bg(font[c], pil_img, (c_x, c_y - y_offset))
+            else:
+                draw.text((c_x, c_y - y_offset), c, fill=word_color, font=font)
 
             c_x += (chars_size[i][0] + char_space_width)
 
         return text_x, text_y, width, height
 
-    def draw_text_wrapper(self, draw, text, x, y, font, text_color, font2):
+    def draw_text_wrapper(self, draw, text, x, y, font, text_color, font2, pil_img):
         """
         :param x/y: 应该是移除了 offset 的
         """
@@ -369,15 +388,25 @@ class Renderer(object):
             else:
                 text_color2 = text_color
             for i, c in enumerate(text):
-                if random.random() < self.cfg.second_font.change_rate:
+                if random.random() < self.cfg.second_font.change_rate and not self.fonts_by_image:
                     y_offset = np.random.uniform(0, font2.getoffset(c)[1])
                     draw.text((x, y + y_offset), c, fill=text_color2, font=font2)
                     x += font2.getsize(c)[0]
                 else:
-                    draw.text((x, y), c, fill=text_color, font=font)
-                    x += font.getsize(c)[0]
+                    if self.fonts_by_image:
+                        pil_img = self.mix_seamless_bg(font[c], pil_img, (x, y))
+                        x += font[c].shape[1]
+                    else:
+                        draw.text((x, y), c, fill=text_color, font=font)
+                        x += font.getsize(c)[0]
         else:
-            draw.text((x, y), text, fill=text_color, font=font)
+            if self.fonts_by_image:
+                for c in text:
+                    pil_img = self.mix_seamless_bg(font[c], pil_img, (x, y))
+                    x += font[c].shape[1]
+            else:
+                draw.text((x, y), text, fill=text_color, font=font)
+        return pil_img
 
     def draw_border_text(self, draw, text, x, y, font, text_color):
         """
@@ -474,7 +503,7 @@ class Renderer(object):
 
         if self.strict:
             unsupport_chars = self.font_unsupport_chars[font_path]
-            unsupport_chars.extend(self.font_unsupport_chars[font_path_2])
+            # unsupport_chars.extend(self.font_unsupport_chars[font_path_2])
             for c in word:
                 if c == ' ':
                     continue
@@ -486,19 +515,36 @@ class Renderer(object):
         # Font size in point
         font_size = random.randint(
             self.cfg.font_size.min, self.cfg.font_size.max)
-        font = ImageFont.truetype(font_path, font_size)
+        if self.fonts_by_image:
+            font = self.loads_fonts_by_image(font_path, font_size)
+        else:
+            font = ImageFont.truetype(font_path, font_size)
         if self.cfg.second_font.font_size_change:
             font_size_2 = font_size - random.randint(1, 10)
         else:
             font_size_2 = font_size
         if self.cfg.second_font.font_change:
-            font2 = ImageFont.truetype(font_path_2, font_size_2)
+            if self.fonts_by_image:
+                font2 = self.loads_fonts_by_image(font_path_2, font_size_2)
+            else:
+                font2 = ImageFont.truetype(font_path_2, font_size_2)
         else:
-            font2 = ImageFont.truetype(font_path, font_size_2)
+            if self.fonts_by_image:
+                font2 = self.loads_fonts_by_image(font_path, font_size_2)
+            else:
+                font2 = ImageFont.truetype(font_path, font_size_2)
 
-        return word, font, self.get_word_size(font, word), font2
+        return word, font, self.get_word_size(font, word, font_size), font2
 
-    def get_word_size(self, font, word):
+    def loads_fonts_by_image(self, font_path, font_size):
+        fonts = {}
+        for x in os.listdir(font_path):
+            img = cv2.imdecode(np.fromfile(font_path + "/" + x, dtype=np.uint8), cv2.IMREAD_COLOR)
+            h, w = img.shape[:2]
+            fonts[x.replace(".png", "")] = cv2.resize(img, (font_size, h * font_size // w))
+        return fonts
+
+    def get_word_size(self, font, word, default=None):
         """
         Get word size removed offset
         :param font: truetype
@@ -506,8 +552,20 @@ class Renderer(object):
         :return:
             size: word size, removed offset (width, height)
         """
-        offset = font.getoffset(word)
-        size = font.getsize(word)
+        if self.fonts_by_image:
+            offset = (0, 0)
+            w_list, h_list = [], []
+            for c in word:
+                if c in font:
+                    h, w = font[c].shape[:2]
+                else:
+                    h, w = default, default
+                w_list.append(w)
+                h_list.append(h)
+            size = (sum(w_list), max(h_list))
+        else:
+            offset = font.getoffset(word)
+            size = font.getsize(word)
         size = (size[0] - offset[0], size[1] - offset[1])
         return size
 
