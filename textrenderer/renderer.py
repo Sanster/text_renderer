@@ -266,21 +266,21 @@ class Renderer(object):
             text_x, text_y, word_width, word_height = self.draw_text_with_random_space(draw, font, word, word_color,
                                                                                        bg_width, bg_height, pure_bg)
         else:
-            if apply(self.cfg.texture):
+            if apply(self.cfg.texture) and not self.fonts_by_image:
                 pure_bg = Image.new(
                     'RGBA', (bg_width, bg_height), (255, 255, 255, 255))
                 pil_img = Image.new(
                     'RGBA', (bg_width, bg_height), (255, 255, 255, 0))
                 draw = ImageDraw.Draw(pil_img)
-                self.draw_text_wrapper(
-                    draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2)
+                _ = self.draw_text_wrapper(
+                    draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2, pil_img)
                 pil_img = self.texture.apply_cloud_texture(pure_bg, pil_img)
             else:
                 if self.fonts_by_image:
                     pil_img = self.draw_text_wrapper(
                         draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2, pure_bg)
                 else:
-                    self.draw_text_wrapper(
+                    _ = self.draw_text_wrapper(
                         draw, word, text_x - offset[0], text_y - offset[1], font, word_color, font2, pure_bg)
             # draw.text((text_x - offset[0], text_y - offset[1]), word, fill=word_color, font=font)
 
@@ -305,7 +305,7 @@ class Renderer(object):
         else:
             center = (bg.shape[1] // 2, bg.shape[0] // 2)
         mixed_clone = cv2.seamlessClone(
-            text_img, bg, text_mask, center, cv2.MIXED_CLONE)
+                          text_img, bg, text_mask, center, cv2.MIXED_CLONE)
         return mixed_clone
 
     def draw_extra_random_word(self, text_img, text_box_pnts, img_index):
@@ -323,7 +323,7 @@ class Renderer(object):
             text_box_pnts[2][1] - word_height * 0.5
         text_y = np.random.choice([text_y_t, text_y_b],
                                   p=[self.cfg.extra_words.top.fraction, self.cfg.extra_words.bottom.fraction])
-        self.draw_text_wrapper(
+        _ = self.draw_text_wrapper(
             draw, word[:word_len], text_x, text_y, font, word_color, font2, np.uint8(text_img))
         np_img = np.array(pil_img).astype(np.float32)
         return np_img

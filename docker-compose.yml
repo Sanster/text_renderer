@@ -3,3 +3,6 @@ version: "3"
 services: 
     text_render:
         build: .
+    volumes:
+        - ./data/:/the/workdir/text_render/data/
+        - ./output/:/the/workdir/text_render/output/

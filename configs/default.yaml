@@ -27,10 +27,10 @@ font_color:
 # choose what's different from first font
 
 second_font:
-  enable: true
+  enable: false
   fraction: 0.5
   change_rate: 0.3
-  font_change: true
+  font_change: false
   font_size_change: true
   font_color_change: true
 
