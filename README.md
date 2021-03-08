@@ -96,3 +96,17 @@ You can see how perspectiveTransform works and all bounding/rotated boxes.
 
 # Todo
 See https://github.com/Sanster/text_renderer/projects/1
+
+
+## Citing text_renderer
+
+If you use text_renderer in your research, please consider use the following BibTeX entry.
+
+```BibTeX
+@misc{text_renderer,
+  author =       {weiqing.chu},
+  title =        {text_renderer},
+  howpublished = {\url{https://github.com/Sanster/text_renderer}},
+  year =         {2021}
+}
+```
