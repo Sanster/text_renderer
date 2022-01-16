@@ -129,8 +129,8 @@ line_color:
   enable: false
   black:
     fraction: 0.5
-    l_boundary: 0,0,0
-    h_boundary: 64,64,64
+    l_boundary: [0,0,0]
+    h_boundary: [64,64,64]
   blue:
     fraction: 0.5
     l_boundary: [0,0,150]
