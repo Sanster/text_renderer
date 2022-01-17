@@ -15,10 +15,17 @@ class LineState(object):
     middleline_thickness = [1, 2, 3]
     middleline_thickness_p = [0.2, 0.7, 0.1]
 
+    over_line_thickness = [1, 2]
+    over_line_thickness_p = [0.6, 0.4]
+    over_line_transparency = [40,50,60,80]
+    over_line_transparency_p = [0.2, 0.3, 0.3, 0.2]
+    over_line_count = [1,2,3]
+    over_line_count_p = [0.2,0.6,0.2]
+
 
 class Liner(object):
     def __init__(self, cfg):
-        self.linestate = LineState()
+        self.linestate: LineState = LineState()
         self.cfg = cfg
 
     def get_line_color(self):
@@ -40,6 +47,10 @@ class Liner(object):
         b = np.random.randint(l_boundary[2], h_boundary[2])
         return b, g, r
 
+    def get_random_point(self, img):
+        return (int(np.random.randint(img.shape[1])), int(np.random.randint(img.shape[0])))
+
+
     def apply(self, word_img, text_box_pnts, word_color):
         """
         :param word_img:  word image with big background
@@ -60,6 +71,11 @@ class Liner(object):
         if self.cfg.line.middle_line.enable:
             line_p.append(self.cfg.line.middle_line.fraction)
             funcs.append(self.apply_middle_line)
+
+        # Adding random over
+        if self.cfg.line.random_over.enable:
+            line_p.append(self.cfg.line.random_over.fraction)
+            funcs.append(self.apply_random_over)
 
         if len(line_p) == 0:
             return word_img, text_box_pnts
@@ -176,5 +192,33 @@ class Liner(object):
                        color=line_color,
                        thickness=thickness,
                        lineType=cv2.LINE_AA)
+
+        return dst, text_box_pnts
+
+    def apply_random_over(self, word_img, text_box_pnts, line_color):
+        count = int(np.random.choice(self.linestate.over_line_count, p=self.linestate.over_line_count_p))
+
+        dst = word_img
+        # Iterating over number of lines 
+        for i in range(count):
+
+            trans = np.random.choice(self.linestate.over_line_transparency, p=self.linestate.over_line_transparency_p)
+
+            thickness = np.random.choice(self.linestate.over_line_thickness, p=self.linestate.over_line_thickness_p)
+
+            trans = int((trans/100)*255)
+
+            color = self.get_line_color()
+            color = (*color, trans) 
+
+            pt1 = self.get_random_point(word_img)
+            pt2 = self.get_random_point(word_img)
+
+            dst = cv2.line(dst,
+                            pt1,
+                            pt2,
+                            color=line_color,
+                            thickness=thickness,
+                            lineType=cv2.LINE_AA)
 
         return dst, text_box_pnts
