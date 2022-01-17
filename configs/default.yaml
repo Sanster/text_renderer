@@ -113,6 +113,10 @@ line:
   enable: false
   fraction: 0.05
 
+  random_over:
+    enable: true
+    fraction: 0.2
+
   under_line:
     enable: false
     fraction: 0.2
@@ -123,7 +127,7 @@ line:
 
   middle_line:
     enable: false
-    fraction: 0.5
+    fraction: 0.3
 
 line_color:
   enable: false
