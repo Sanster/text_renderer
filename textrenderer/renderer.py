@@ -69,8 +69,7 @@ class Renderer(object):
             word_img, text_box_pnts = self.remaper.apply(word_img, text_box_pnts, word_color)
             self.dmsg("After remapping")
 
-        if self.debug:
-            word_img = draw_box(word_img, text_box_pnts, (155, 255, 0))
+
 
         word_img, img_pnts_transformed, text_box_pnts_transformed = \
             self.apply_perspective_transform(word_img, text_box_pnts,
